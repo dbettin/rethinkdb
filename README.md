@@ -6,7 +6,7 @@ A [Dart](http://www.dartlang.org) driver for [RethinkDB](http://www.rethinkdb.co
 
 Caveat:
 =========
-This driver is very early in its development.  I'm currently using this driver in a project and will be added funcationality on is as needed basis.
+This driver is very early in its development.  I'm currently using this driver in a project and will be adding functionality as needed.
 
 
 Getting Started:
