@@ -1,7 +1,7 @@
 Dart RethinkDB Driver
 =========
 
-A [Dart](http://www.dartlang.org) driver for [RethinkDB](http://www.rethinkdb.org) written by Dave Bettin.
+A [Dart](http://www.dartlang.org) driver for [RethinkDB](http://www.rethinkdb.com) written by Dave Bettin.
 
 
 Caveat:
