@@ -1,4 +1,9 @@
 name: rethinkdb
+version: 0.1.0
+author: Dave Bettin <me@davebettin.com>
+description: Dart driver for RethinkDB.
+homepage: https://github.com/dbettin/rethinkdb
+documentation: https://github.com/dbettin/rethinkdb/blob/master/README.md
 dependencies:
   protobuf:
     git: https://github.com/dart-lang/dart-protobuf.git
