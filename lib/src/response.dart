@@ -19,3 +19,9 @@ class DroppedResponse {
   }
 }
 
+class InsertedResponse {
+  bool inserted;
+  InsertedResponse(List input) {
+  //TODO check if it was successful
+  }
+}

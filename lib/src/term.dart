@@ -50,7 +50,12 @@ abstract class _DroppedResponseTerm extends _ResponseTerm {
 
   DroppedResponse buildQueryResponse(Map response) => new DroppedResponse(response);
 }
+abstract class _InsertedResponseTerm extends _ResponseTerm {
+  _InsertedResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+    super(termType, args, options);
 
+  InsertedResponse buildQueryResponse(List response) => new InsertedResponse(response);
+}
 abstract class _ListResponseTerm extends _ResponseTerm {
   _ListResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
     super(termType, args, options);
@@ -105,6 +110,41 @@ class RqlTable extends _RqlTerm {
   RqlIndexDrop indexDrop(String indexName) {
     return new RqlIndexDrop(this, indexName);
   }
+
+  RqlInsert insert(List records){
+    List<Datum_AssocPair> fixed_records = [];
+
+    records.forEach((element)=>
+        element.forEach((k,v){
+          var datum;
+          if(v is String)
+          {
+            datum = new _RqlDatumString(v);
+          }
+          if(v is bool)
+          {
+            datum = new _RqlDatumBool(v);
+          }
+          if(v is Map)
+          {
+            datum = new _RqlDatumObject(v);
+          }
+          if(v is num)
+          {
+            datum = new _RqlDatumNum(v);
+          }
+          if(v is List)
+          {
+            datum = new _RqlDatumArray(v);
+          }
+          var d = new Datum_AssocPair();
+          d.key = k;
+          d.val = datum._buildProtoDatum();
+          fixed_records.add(d);
+        }
+    ));
+    return new RqlInsert(this, fixed_records);
+  }
 }
 
 class RqlIndexCreate extends _CreatedResponseTerm {
@@ -119,3 +159,6 @@ class RqlIndexDrop extends _DroppedResponseTerm {
   RqlIndexDrop(RqlTable table, String indexName) : super(Term_TermType.INDEX_DROP,  [table, new _RqlDatumString(indexName)]);
 }
 
+class RqlInsert extends _InsertedResponseTerm {
+  RqlInsert(RqlTable table, List records) : super(Term_TermType.INSERT, [table, new _RqlDatumObject(records)]);
+}

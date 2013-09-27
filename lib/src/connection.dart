@@ -134,7 +134,6 @@ class Connection {
     bytes.add((data >> 8) & 0x000000FF);
     bytes.add((data >> 16) & 0x000000FF);
     bytes.add((data >> 24) & 0x000000FF);
-
     return bytes;
 
   }

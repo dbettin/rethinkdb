@@ -32,7 +32,6 @@ class _RqlQuery {
   }
 
   _handleProtoResponse(Response protoResponse) {
-
     if (options != null && options.noReply) {
       _query.complete();
     } else {
@@ -43,12 +42,10 @@ class _RqlQuery {
           break;
         case Response_ResponseType.RUNTIME_ERROR:
           var datum = protoResponse.response.first;
-          print(datum.rStr);
           _query.completeError(new RqlQueryException(datum.rStr));
           break;
         default:
           var datum = protoResponse.response.first;
-          print(datum.rStr);
           _query.completeError(new RqlDriverException(datum.rStr));
           break;
       }

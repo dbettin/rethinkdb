@@ -29,7 +29,7 @@ abstract class _RqlDatum<T> extends _RqlTerm {
   }
 
   T value;
-  Datum _buildProtoDatum();
+  _buildProtoDatum();
 
 }
 
@@ -39,7 +39,7 @@ class _RqlDatumString extends _RqlDatum {
 
   _RqlDatumString(this.value);
 
-  Datum _buildProtoDatum() {
+  _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_STR;
     datum.rStr = value;
@@ -49,13 +49,17 @@ class _RqlDatumString extends _RqlDatum {
 }
 
 class _RqlDatumObject extends _RqlDatum {
-  Map<String, dynamic> value = {};
+  List value = [];
 
   _RqlDatumObject(List<Datum_AssocPair> assocPair) {
-    assocPair.forEach((pair) => value[pair.key] = _buildDatumResponseValue(pair.val));
+    assocPair.forEach((element)=>
+        value.add(element));
   }
-  Datum _buildProtoDatum() {
-    // TODO implement this method
+  _buildProtoDatum() {
+    var datum = new Datum();
+    datum.type = Datum_DatumType.R_OBJECT;
+    value.forEach((pair)=>datum.rObject.add(pair));
+    return datum;
   }
 
 }
@@ -66,7 +70,7 @@ class _RqlDatumBool extends _RqlDatum {
 
   _RqlDatumBool(this.value);
 
-  Datum _buildProtoDatum() {
+  _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_BOOL;
     datum.rBool = value;
@@ -80,7 +84,7 @@ class _RqlDatumNum extends _RqlDatum {
 
   _RqlDatumNum(this.value);
 
-  Datum _buildProtoDatum() {
+  _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_NUM;
     datum.rNum = value.toDouble();
@@ -93,10 +97,33 @@ class _RqlDatumArray extends _RqlDatum {
   List value = [];
 
   _RqlDatumArray(data) {
-    data.forEach((datum) => value.add(_buildDatumResponseValue(datum)));
+    data.forEach((v){
+      var datum = new Datum();
+      if(v is String)
+      {
+        datum = new _RqlDatumString(v);
+      }
+      if(v is bool)
+      {
+        datum = new _RqlDatumBool(v);
+      }
+      if(v is Map)
+      {
+        datum = new _RqlDatumObject(v);
+      }
+      if(v is num)
+      {
+        datum = new _RqlDatumNum(v);
+      }
+      if(v is List)
+      {
+        datum = new _RqlDatumArray(v);
+      }
+      value.add(_buildDatumResponseValue(v));
+    });
   }
 
-  Datum _buildProtoDatum() {
+  _buildProtoDatum() {
     // TODO implement this method
   }
 }
