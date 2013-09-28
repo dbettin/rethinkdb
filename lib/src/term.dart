@@ -54,7 +54,7 @@ abstract class _InsertedResponseTerm extends _ResponseTerm {
   _InsertedResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
     super(termType, args, options);
 
-  InsertedResponse buildQueryResponse(List response) => new InsertedResponse(response);
+  InsertedResponse buildQueryResponse(Map response) => new InsertedResponse(response);
 }
 abstract class _ListResponseTerm extends _ResponseTerm {
   _ListResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :

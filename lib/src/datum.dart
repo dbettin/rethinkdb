@@ -49,16 +49,16 @@ class _RqlDatumString extends _RqlDatum {
 }
 
 class _RqlDatumObject extends _RqlDatum {
-  List value = [];
+  Map value = {};
 
   _RqlDatumObject(List<Datum_AssocPair> assocPair) {
     assocPair.forEach((element)=>
-        value.add(element));
+        value[element.key] = element);
   }
   _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_OBJECT;
-    value.forEach((pair)=>datum.rObject.add(pair));
+    value.forEach((k,v){datum.rObject.add(v);});
     return datum;
   }
 

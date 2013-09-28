@@ -21,7 +21,9 @@ class DroppedResponse {
 
 class InsertedResponse {
   bool inserted;
-  InsertedResponse(List input) {
-  //TODO check if it was successful
+  InsertedResponse(Map input) {
+  if(input["inserted"].val.rNum == 1) {
+    inserted = true;
+  }
   }
 }
