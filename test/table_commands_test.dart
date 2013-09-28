@@ -24,7 +24,9 @@ Future table_command_tests(conn) {
         expect(response[0], "test_table");
       });
     });
-
+    test("must add data", () {
+      _test(table('test_table').insert([{'test key':'test_val'}]), (response) => expect(response.inserted, isTrue));
+    });
     test("must create index", () {
       _test(table("test_table").indexCreate("myindex"), (response) => expect(response.created, isTrue));
     });
