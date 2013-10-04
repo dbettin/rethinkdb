@@ -3,7 +3,7 @@ part of rethinkdb;
 class CreatedResponse {
   bool created;
   CreatedResponse(Map input){
-    if (input["created"] == 1) {
+    if (input["created"].val.rNum == 1) {
       created = true;
     }
   }
@@ -13,7 +13,7 @@ class CreatedResponse {
 class DroppedResponse {
   bool dropped;
   DroppedResponse(Map input){
-    if (input["dropped"] == 1) {
+    if (input["dropped"].val.rNum == 1) {
       dropped = true;
     }
   }

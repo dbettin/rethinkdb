@@ -21,7 +21,7 @@ Future table_command_tests(conn) {
     test("must list table", () {
       _test(tableList(), (response) {
         expect(response.length, 1);
-        expect(response[0], "test_table");
+        expect(response[0].rStr, "test_table");
       });
     });
     test("must add data", () {
@@ -34,7 +34,7 @@ Future table_command_tests(conn) {
     test("must list index", () {
       _test(table("test_table").indexList(), (response) {
         expect(response.length, 1);
-        expect(response[0], "myindex");
+        expect(response[0].rStr, "myindex");
       });
     });
 

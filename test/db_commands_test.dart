@@ -26,7 +26,7 @@ Future db_command_tests(conn) {
     test("must list db", () {
       _test(dbList(), (response) {
         expect(response.length, 1);
-        expect(response[0], "testdb");
+        expect(response[0].rStr, "testdb");
       });
     });
 
