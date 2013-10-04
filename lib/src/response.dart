@@ -27,3 +27,14 @@ class InsertedResponse {
   }
   }
 }
+
+class CountedResponse {
+  num counted;
+  InsertedResponse(num input) {
+  print(input);
+  }
+
+  fromResponse(num input){
+    counted = input;
+  }
+}

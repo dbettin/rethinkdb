@@ -63,6 +63,13 @@ abstract class _ListResponseTerm extends _ResponseTerm {
   List buildQueryResponse(List response) => response;
 }
 
+abstract class _CountResponseTerm extends _ResponseTerm {
+  _CountResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+    super(termType, args, options);
+
+  int buildQueryResponse(num response) => response.toInt();
+}
+
 ///
 /// Management Terms
 ///
@@ -113,6 +120,10 @@ class RqlTable extends _RqlTerm {
 
   RqlInsert insert(List records){
     return new RqlInsert(this, expr(records));
+  }
+
+  RqlCount count(){
+    return new RqlCount(this);
   }
 }
 
@@ -166,4 +177,8 @@ class RqlIndexDrop extends _DroppedResponseTerm {
 
 class RqlInsert extends _InsertedResponseTerm {
   RqlInsert(RqlTable table, records) : super(Term_TermType.INSERT, [table, records]);
+}
+
+class RqlCount extends _CountResponseTerm {
+  RqlCount(RqlTable table) : super(Term_TermType.COUNT, [table]);
 }
