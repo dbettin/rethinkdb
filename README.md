@@ -1,12 +1,11 @@
 Dart RethinkDB Driver
 =========
 
-A [Dart](http://www.dartlang.org) driver for [RethinkDB](http://www.rethinkdb.com) written by Dave Bettin.
+A [Dart](http://www.dartlang.org) driver for [RethinkDB](http://www.rethinkdb.com).
 
+This project is a fork of [Dave Bettins rethink driver](https://github.com/dbettin/rethinkdb)
 
-Caveat:
-=========
-This driver is very early in its development.  I'm currently using this driver in a project and will be adding functionality as needed.
+Not all functionality has been implemented.
 
 
 Getting Started:
@@ -14,7 +13,17 @@ Getting Started:
 
 The driver api tries to align with the javascript and python RethinkDB drivers. You can read their documentation [here](http://www.rethinkdb.com/api/).
 
-Until the driver is more complete, your best bet is to look at the drivers' tests to form an understanding of how to use the driver.
+  clone the repository:
+  ```
+    git clone https://github.com/billysometimes/rethinkdb.git
+  ````
+  open the project in Dart Editor and view examples.dart to see the available features and how to use them.
+
+  to include this driver in your own project add:
+    ```
+    import 'lib/rethinkdb.dart';
+    ````
+  to your project.
 
 Running Tests:
 ========
