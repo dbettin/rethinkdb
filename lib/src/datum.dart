@@ -51,14 +51,23 @@ class _RqlDatumString extends _RqlDatum {
 class _RqlDatumObject extends _RqlDatum {
   Map value = {};
 
-  _RqlDatumObject(List<Datum_AssocPair> assocPair) {
-    assocPair.forEach((element)=>
-        value[element.key] = element);
+  _RqlDatumObject(val) {
+    if(val is Map)
+      this.value = val;
+    else
+      val.forEach((element){
+        value[element.key] = element;
+      });
   }
+
   _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_OBJECT;
-    value.forEach((k,v){datum.rObject.add(v);});
+    value.forEach((k,v){
+      Datum_AssocPair d = new Datum_AssocPair();
+      d.key = k;
+      d.val = v._buildProtoDatum();
+      datum.rObject.add(d);});
     return datum;
   }
 
@@ -98,32 +107,14 @@ class _RqlDatumArray extends _RqlDatum {
 
   _RqlDatumArray(data) {
     data.forEach((v){
-      var datum = new Datum();
-      if(v is String)
-      {
-        datum = new _RqlDatumString(v);
-      }
-      if(v is bool)
-      {
-        datum = new _RqlDatumBool(v);
-      }
-      if(v is Map)
-      {
-        datum = new _RqlDatumObject(v);
-      }
-      if(v is num)
-      {
-        datum = new _RqlDatumNum(v);
-      }
-      if(v is List)
-      {
-        datum = new _RqlDatumArray(v);
-      }
-      value.add(_buildDatumResponseValue(v));
+     value.add(v);
     });
   }
 
   _buildProtoDatum() {
-    // TODO implement this method
+    var datum = new Datum();
+    datum.type = Datum_DatumType.R_ARRAY;
+    value.forEach((element)=>datum.rArray.add(element._buildProtoDatum()));
+    return datum;
   }
 }

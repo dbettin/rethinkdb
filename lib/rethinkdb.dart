@@ -4,8 +4,6 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'src/generated/QL2.pb.dart';
-import 'dart:json';
-import 'dart:utf';
 part 'src/connection.dart';
 part 'src/exceptions.dart';
 part 'src/term.dart';

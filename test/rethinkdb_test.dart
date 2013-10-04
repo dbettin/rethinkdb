@@ -1,13 +1,8 @@
 library rethinkdb_test;
 
-import 'dart:io';
 import 'dart:async';
 import 'package:unittest/unittest.dart';
-import 'package:unittest/mock.dart';
 import 'package:rethinkdb/rethinkdb.dart';
-
-
-import 'dart:mirrors';
 
 part 'connection_test.dart';
 part 'db_commands_test.dart';
@@ -16,7 +11,7 @@ part 'table_commands_test.dart';
 main() {
 
   // connection_tests();
-  connect(authKey: "test", db: "testdb")
+  connect(authKey: "", db: "testdb")
     .then((conn) => db_command_tests(conn))
     .then((conn) => setup_db(conn))
     .then((conn) => table_command_tests(conn))
