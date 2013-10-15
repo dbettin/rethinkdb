@@ -26,7 +26,7 @@ RqlQueryRunner dbList() => new _RqlDBList();
 
 // Table Management Queries
 RqlQueryRunner tableList() => new _RqlTableList();
-RqlQueryRunner tableCreate(String tableName, [TableCreateOptions options]) => new _RqlTableCreate(tableName, options);
+RqlQueryRunner tableCreate(String tableName, [var options]) => new _RqlTableCreate(tableName, options);
 RqlQueryRunner tableDrop(String tableName) => new _RqlTableDrop(tableName);
 RqlTable table(String tableName) => new RqlTable(tableName);
 

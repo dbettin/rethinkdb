@@ -1,7 +1,7 @@
 part of rethinkdb;
 
 abstract class RqlQueryRunner {
-  Future run(Connection connection, [RunOptions options]) {
+  Future run(Connection connection, [Map options]) {
     var query = new _RqlQuery(this, connection, options);
     return query._execute();
   }
@@ -11,7 +11,7 @@ class _RqlQuery {
 
   final _ResponseTerm _term;
   final Connection _connection;
-  final RunOptions options;
+  final Map options;
   Query _protoQuery;
   final Completer _query = new Completer();
   String currentDatabase;
@@ -27,12 +27,12 @@ class _RqlQuery {
     _protoQuery.query = _term._buildProtoTerm();
 
     if (options != null) {
-      new QueryOptionsBuilder(_protoQuery.globalOptargs).buildProtoOptions(options.options);
+      new QueryOptionsBuilder(_protoQuery.globalOptargs).buildProtoOptions(options);
     }
   }
 
   _handleProtoResponse(Response protoResponse) {
-    if (options != null && options.noReply) {
+    if (options != null && options["noReply"]) {
       _query.complete();
     } else {
       switch (protoResponse.type) {

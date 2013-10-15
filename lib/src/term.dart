@@ -6,11 +6,11 @@ part of rethinkdb;
 abstract class _RqlTerm extends Object with RqlQueryRunner {
 
   final List<_RqlTerm> _args;
-  final RqlOptions _options;
+  final Map _options;
   Term_TermType _termType;
 
 
-  _RqlTerm(Term_TermType this._termType, [List<_RqlTerm> this._args, RqlOptions this._options]);
+  _RqlTerm(Term_TermType this._termType, [List<_RqlTerm> this._args, Map this._options]);
 
   Term _buildProtoTerm() {
     var term = new Term();
@@ -22,7 +22,7 @@ abstract class _RqlTerm extends Object with RqlQueryRunner {
       });
 
       if (_options != null) {
-        new TermOptionsBuilder(term.optargs).buildProtoOptions(_options.options);
+        new TermOptionsBuilder(term.optargs).buildProtoOptions(_options);
       }
     }
 
@@ -31,40 +31,40 @@ abstract class _RqlTerm extends Object with RqlQueryRunner {
 }
 
 abstract class _ResponseTerm<T,S> extends _RqlTerm {
-  _ResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+  _ResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
   T buildQueryResponse(S response);
 }
 
 abstract class _CreatedResponseTerm extends _ResponseTerm {
-  _CreatedResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+  _CreatedResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
   CreatedResponse buildQueryResponse(Map response) => new CreatedResponse(response);
 }
 
 abstract class _DroppedResponseTerm extends _ResponseTerm {
-  _DroppedResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+  _DroppedResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
   DroppedResponse buildQueryResponse(Map response) => new DroppedResponse(response);
 }
 abstract class _InsertedResponseTerm extends _ResponseTerm {
-  _InsertedResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+  _InsertedResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
   InsertedResponse buildQueryResponse(Map response) => new InsertedResponse(response);
 }
 abstract class _ListResponseTerm extends _ResponseTerm {
-  _ListResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+  _ListResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
   List buildQueryResponse(List response) => response;
 }
 
 abstract class _CountResponseTerm extends _ResponseTerm {
-  _CountResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
+  _CountResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
   int buildQueryResponse(num response) => response.toInt();
@@ -90,7 +90,7 @@ class RqlDatabase extends _RqlTerm {
 }
 
 class _RqlTableCreate extends _CreatedResponseTerm {
-  _RqlTableCreate(String tableName, [TableCreateOptions options]) :
+  _RqlTableCreate(String tableName, [Map options]) :
     super(Term_TermType.TABLE_CREATE,  [new _RqlDatumString(tableName)], options);
 }
 
@@ -104,7 +104,7 @@ class _RqlTableList extends _ListResponseTerm {
 }
 
 class RqlTable extends _RqlTerm {
-  RqlTable(String tableName, [TableOptions options]) : super(Term_TermType.TABLE, [new _RqlDatumString(tableName)], options);
+  RqlTable(String tableName, [Map options]) : super(Term_TermType.TABLE, [new _RqlDatumString(tableName)], options);
 
   RqlIndexCreate indexCreate(String indexName) {
     return new RqlIndexCreate(this, indexName);
