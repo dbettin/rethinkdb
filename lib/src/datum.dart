@@ -55,9 +55,11 @@ class _RqlDatumObject extends _RqlDatum {
     if(val is Map)
       this.value = val;
     else
+    {
       val.forEach((element){
-        value[element.key] = element;
+        value[element.key] = _buildDatumResponseValue(element.val);
       });
+    }
   }
 
   _buildProtoDatum() {
@@ -107,7 +109,10 @@ class _RqlDatumArray extends _RqlDatum {
 
   _RqlDatumArray(data) {
     data.forEach((v){
-     value.add(v);
+        if(v is Datum)
+          value.add(_buildDatumResponseValue(v));
+        else
+          value.add(v);
     });
   }
 

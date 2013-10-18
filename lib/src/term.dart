@@ -41,20 +41,20 @@ abstract class _CreatedResponseTerm extends _ResponseTerm {
   _CreatedResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
-  CreatedResponse buildQueryResponse(Map response) => new CreatedResponse(response);
+  Map buildQueryResponse(Map response) => response;
 }
 
 abstract class _DroppedResponseTerm extends _ResponseTerm {
   _DroppedResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
-  DroppedResponse buildQueryResponse(Map response) => new DroppedResponse(response);
+  Map buildQueryResponse(Map response) => response;
 }
 abstract class _InsertedResponseTerm extends _ResponseTerm {
   _InsertedResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
     super(termType, args, options);
 
-  InsertedResponse buildQueryResponse(Map response) => new InsertedResponse(response);
+  Map buildQueryResponse(Map response) => response;
 }
 abstract class _ListResponseTerm extends _ResponseTerm {
   _ListResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
@@ -69,6 +69,13 @@ abstract class _CountResponseTerm extends _ResponseTerm {
 
   int buildQueryResponse(num response) => response.toInt();
 }
+
+ abstract class _GetResponseTerm extends _ResponseTerm {
+   _GetResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
+     super(termType, args, options);
+
+   Map buildQueryResponse(Map response) => response;
+ }
 
 ///
 /// Management Terms
@@ -124,6 +131,10 @@ class RqlTable extends _RqlTerm {
 
   RqlCount count(){
     return new RqlCount(this);
+  }
+
+  RqlGet get(var key){
+    return new RqlGet(this, expr(key));
   }
 }
 
@@ -181,4 +192,8 @@ class RqlInsert extends _InsertedResponseTerm {
 
 class RqlCount extends _CountResponseTerm {
   RqlCount(RqlTable table) : super(Term_TermType.COUNT, [table]);
+}
+
+class RqlGet extends _GetResponseTerm {
+  RqlGet(RqlTable table, key) : super(Term_TermType.GET, [table, key]);
 }

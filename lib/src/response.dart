@@ -22,10 +22,9 @@ class DroppedResponse {
 class InsertedResponse {
   bool inserted;
   InsertedResponse(Map input) {
-  if(input["inserted"].val.rNum > 0) {
-    inserted = true;
-  }
-  }
+    if (input["inserted"] > 0)
+      inserted = true;
+    }
 }
 
 class CountedResponse {
