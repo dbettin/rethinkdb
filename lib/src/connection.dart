@@ -21,19 +21,21 @@ class Connection {
   final Map<int, _RqlQuery> _queries = new Map<int, _RqlQuery>();
   Socket _socket;
   int _connection_state = _NOT_CONNECTED;
+  final Map <String, List> listeners = new Map<String, List>();
 
   Connection._internal(this._connected, this.db, this._host, this._port, this._authKey) {
     _connect();
   }
 
   static Future<Connection> connect(String db, String host, num port, String authKey) {
-
     var connected = new Completer();
     var connection = new Connection._internal(connected, db, host, port,  authKey);
     return connected.future;
   }
 
   close() {
+    if(listeners["close"] != null)
+      listeners["close"].forEach((func)=>func());
     if (_connection_state != _CLOSED && _socket != null) {
       _socket.destroy();
     }
@@ -42,6 +44,20 @@ class Connection {
   reconnect() {
     close();
     _connect();
+  }
+  on(String key, Function val)
+  {
+    addListener(key,val);
+  }
+
+  addListener(String key, Function val)
+  {
+    List currentListeners = [];
+    if(listeners != null && listeners[key] != null)
+      listeners[key].forEach((element)=>currentListeners.add(element));
+
+    currentListeners.add(val);
+    listeners[key] = currentListeners;
   }
 
   use(dbName) => db = dbName;
@@ -54,7 +70,8 @@ class Connection {
   }
 
   _connect() {
-
+    if(listeners["connect"] != null)
+      listeners["connect"].forEach((func)=>func());
     Socket.connect(_host, _port).then((socket) {
       _connection_state = _CONNECTED;
       _socket = socket;
@@ -74,6 +91,8 @@ class Connection {
   }
 
   _handleConnectionError(error) {
+    if(listeners["error"] != null)
+      listeners["error"].forEach((func)=>func(error));
 
     if (error is! RqlConnectionException) {
       error = new RqlConnectionException("Failed to connect with message: ${error.message}.", error);

@@ -22,8 +22,13 @@ Future exampleCommands(conn)
 
   //the use method of the connection can change the working database
 
-  conn.use("app_db");
 
+  //addListener allows you to listen to changes in connection state.  'on' can be used as well.
+
+  conn.addListener('close',()=>print("connection closed"));
+  conn.on('connect',()=>print("connection opened"));
+
+  //conn.reconnect();
 
 
   //tableCreate() accepts a string for the name of the table to be created and returns a CreatedResponse
@@ -33,7 +38,7 @@ Future exampleCommands(conn)
 
   //tableCreate("Users",{'primary_key':'user_id'}).run(conn).then((response)=>print(response));
 
-
+  //table("Users").run(conn).then((response)=>print(response));
 
 
   //tableList() returns a list of table names
@@ -53,8 +58,15 @@ Future exampleCommands(conn)
   //table("Users").indexList().run(conn).then((response)=>print(response));
 
 
-  //insert accepts a list of Maps and returns an InsertedResponse
+
+
+  //insert accepts either a Map or List of Maps and returns a Map
+
   //table("Users").insert([{"Name":"Jane Doe","Age":28, 'user_id':127},{"Name":"Jon Doe","Age":22}]).run(conn).then((response)=>print(response));
+
+  table("Users").insert({"a test":"item"},{'returnVals':true}).run(conn).then((response)=>print(response));
+
+
 
 
   //get accepts a key and returns the object
@@ -66,7 +78,7 @@ Future exampleCommands(conn)
 
   //count() returns the number of objects in a table
 
-  table("Users").count().run(conn).then((response)=>print(response));
+  //table("Users").count().run(conn).then((response)=>print(response));
 
 
   //tableDrop() accepts a string for the name of the table to be dropped and returns a DroppedResponse

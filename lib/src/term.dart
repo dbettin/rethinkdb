@@ -125,7 +125,7 @@ class RqlTable extends _ResponseTerm {
     return new RqlIndexDrop(this, indexName);
   }
 
-  RqlInsert insert(List records){
+  RqlInsert insert(records){
     return new RqlInsert(this, expr(records));
   }
 

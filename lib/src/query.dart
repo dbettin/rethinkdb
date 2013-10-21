@@ -32,7 +32,7 @@ class _RqlQuery {
   }
 
   _handleProtoResponse(Response protoResponse) {
-    if (options != null && options["noReply"]) {
+    if (options != null && options["noReply"]==true) {
       _query.complete();
     } else {
       switch (protoResponse.type) {
