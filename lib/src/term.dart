@@ -110,7 +110,7 @@ class _RqlTableList extends _ListResponseTerm {
   _RqlTableList() : super(Term_TermType.TABLE_LIST);
 }
 
-class RqlTable extends _RqlTerm {
+class RqlTable extends _ResponseTerm {
   RqlTable(String tableName, [Map options]) : super(Term_TermType.TABLE, [new _RqlDatumString(tableName)], options);
 
   RqlIndexCreate indexCreate(String indexName) {
@@ -136,6 +136,8 @@ class RqlTable extends _RqlTerm {
   RqlGet get(var key){
     return new RqlGet(this, expr(key));
   }
+
+  buildQueryResponse(var response)=>response;
 }
 
 

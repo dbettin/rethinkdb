@@ -9,7 +9,6 @@ part 'src/exceptions.dart';
 part 'src/term.dart';
 part 'src/datum.dart';
 part 'src/query.dart';
-part 'src/response.dart';
 part 'src/options.dart';
 
 

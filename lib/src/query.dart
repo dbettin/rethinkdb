@@ -40,6 +40,13 @@ class _RqlQuery {
           var datumValue = _buildDatumResponseValue(protoResponse.response.first);
           _query.complete(_term.buildQueryResponse(datumValue));
           break;
+        case Response_ResponseType.SUCCESS_SEQUENCE:
+          var datumValue = [];
+          protoResponse.response.forEach((e){
+          datumValue.add(_buildDatumResponseValue(e));
+          });
+          _query.complete(_term.buildQueryResponse(datumValue));
+          break;
         case Response_ResponseType.RUNTIME_ERROR:
           var datum = protoResponse.response.first;
           _query.completeError(new RqlQueryException(datum.rStr));
