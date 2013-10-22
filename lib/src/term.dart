@@ -137,6 +137,10 @@ class RqlTable extends _ResponseTerm {
     return new RqlGet(this, expr(key));
   }
 
+  RqlUpdate update(Map info, [Map options]){
+    return new RqlUpdate(this, expr(info), options);
+  }
+
   buildQueryResponse(var response)=>response;
 }
 
@@ -196,6 +200,19 @@ class RqlCount extends _CountResponseTerm {
   RqlCount(RqlTable table) : super(Term_TermType.COUNT, [table]);
 }
 
-class RqlGet extends _GetResponseTerm {
-  RqlGet(RqlTable table, key) : super(Term_TermType.GET, [table, key]);
+class RqlUpdate extends _InsertedResponseTerm {
+  RqlUpdate(term,info,Map options) : super(Term_TermType.UPDATE, [term,info], options);
 }
+
+class RqlGet extends _GetResponseTerm {
+  RqlTable table;
+  RqlGet(RqlTable table, key) : super(Term_TermType.GET, [table, key])
+  {
+    this.table = table;
+  }
+
+  RqlUpdate update(Map info, [Map options]){
+    return new RqlUpdate(this, expr(info), options);
+  }
+}
+

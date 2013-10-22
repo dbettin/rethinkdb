@@ -67,8 +67,10 @@ Future exampleCommands(conn)
   //table("Users").insert({"a test":"item"},{'return_vals':true}).run(conn).then((response)=>print(response));
 
 
+  //table("Users").insert({"Name":"Jane R. Doe","Age":28,"user_id":127}, {"upsert":true,"return_vals":true}).run(conn).then((response)=>print(response));
 
-
+  //table("Users").get(127).update({"Name":"Jennies"},{'return_vals':true}).run(conn).then((response)=>print(response));
+  //table("Users").update({"Name":"Pete"}).run(conn).then((response)=>print(response));
   //get accepts a key and returns the object
   //table("Users").get(127).run(conn).then((response)=>print(response));
 
