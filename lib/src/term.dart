@@ -145,6 +145,29 @@ class RqlTable extends _ResponseTerm {
     return new RqlReplace(this, expr(info), options);
   }
 
+  RqlDelete delete([Map options]){
+    return new RqlDelete(this, options);
+  }
+
+  RqlFilter filter(Map filter){
+    return new RqlFilter(this,expr(filter));
+  }
+
+  RqlGetAll getAll(var val, Map<String, String> key){
+    List builtList = [];
+    builtList.add(this);
+    if(val is List)
+      val.forEach((element)=>builtList.add(expr(element)));
+    else
+      builtList.add(expr(val));
+    return new RqlGetAll(builtList,key);
+  }
+
+  RqlBetween between(var key1,var key2,[Map options])
+  {
+    return new RqlBetween(this,expr(key1),expr(key2),options);
+  }
+
   buildQueryResponse(var response)=>response;
 }
 
@@ -212,6 +235,26 @@ class RqlReplace extends _InsertedResponseTerm {
   RqlReplace(term,info,Map options) : super(Term_TermType.REPLACE, [term,info], options);
 }
 
+class RqlDelete extends _InsertedResponseTerm {
+  RqlDelete(term,Map options) : super(Term_TermType.DELETE, [term], options);
+}
+
+class RqlGetAll extends _ListResponseTerm {
+  RqlGetAll(val,key) : super(Term_TermType.GET_ALL,val,key);
+
+  RqlFilter filter(Map filter){
+    return new RqlFilter(this,expr(filter));
+  }
+}
+
+class RqlBetween extends _ListResponseTerm {
+  RqlBetween(term,key1,key2,options) : super(Term_TermType.BETWEEN,[term,key1,key2],options);
+}
+
+class RqlFilter extends _ListResponseTerm {
+  RqlFilter(term,filter) : super(Term_TermType.FILTER,[term,filter]);
+}
+
 class RqlGet extends _GetResponseTerm {
   RqlTable table;
   RqlGet(RqlTable table, key) : super(Term_TermType.GET, [table, key])
@@ -225,6 +268,10 @@ class RqlGet extends _GetResponseTerm {
 
   RqlReplace replace(Map info, [Map options]){
     return new RqlReplace(this, expr(info), options);
+  }
+
+  RqlDelete delete([Map options]){
+    return new RqlDelete(this, options);
   }
 }
 
