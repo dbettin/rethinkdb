@@ -21,7 +21,7 @@ Future exampleCommands(conn)
 
 
   //the use method of the connection can change the working database
-
+  conn.use('app_db');
 
   //addListener allows you to listen to changes in connection state.  'on' can be used as well.
 
@@ -64,7 +64,7 @@ Future exampleCommands(conn)
 
   //table("Users").insert([{"Name":"Jane Doe","Age":28, 'user_id':127},{"Name":"Jon Doe","Age":22}]).run(conn).then((response)=>print(response));
 
-  table("Users").insert({"a test":"item"},{'returnVals':true}).run(conn).then((response)=>print(response));
+  //table("Users").insert({"a test":"item"},{'return_vals':true}).run(conn).then((response)=>print(response));
 
 
 

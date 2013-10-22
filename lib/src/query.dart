@@ -62,7 +62,7 @@ class _RqlQuery {
   Future _execute() {
     _updateCurrentDatabase();
     _connection._sendQuery(this);
-    return _query.future;
+     return _query.future;
   }
 
   _updateCurrentDatabase() {

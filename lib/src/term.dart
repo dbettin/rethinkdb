@@ -51,7 +51,7 @@ abstract class _DroppedResponseTerm extends _ResponseTerm {
   Map buildQueryResponse(Map response) => response;
 }
 abstract class _InsertedResponseTerm extends _ResponseTerm {
-  _InsertedResponseTerm(termType, [List<_RqlTerm> args, Map options]) :
+  _InsertedResponseTerm(termType, List<_RqlTerm> args, Map options) :
     super(termType, args, options);
 
   Map buildQueryResponse(Map response) => response;
@@ -125,8 +125,8 @@ class RqlTable extends _ResponseTerm {
     return new RqlIndexDrop(this, indexName);
   }
 
-  RqlInsert insert(records){
-    return new RqlInsert(this, expr(records));
+  RqlInsert insert(records, [Map options]){
+    return new RqlInsert(this, expr(records), options);
   }
 
   RqlCount count(){
@@ -189,7 +189,7 @@ class RqlIndexDrop extends _DroppedResponseTerm {
 }
 
 class RqlInsert extends _InsertedResponseTerm {
-  RqlInsert(RqlTable table, records) : super(Term_TermType.INSERT, [table, records]);
+  RqlInsert(RqlTable table, records, options) : super(Term_TermType.INSERT, [table, records], options);
 }
 
 class RqlCount extends _CountResponseTerm {
