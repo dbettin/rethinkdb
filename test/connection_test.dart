@@ -11,10 +11,9 @@ connection_tests() {
     });
 
     test("Must not have a response when no reply is true", () {
-      var options = new RunOptions(noReply: true);
 
       connect(authKey: "test").then(expectAsync1((connection) {
-        dbList().run(connection, options).then((response) {
+        dbList().run(connection, {"noReply":true}).then((response) {
           expect(response, isNull);
           connection.close();
         });

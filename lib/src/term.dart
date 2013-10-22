@@ -3,7 +3,7 @@ part of rethinkdb;
 ///
 /// Base Terms
 ///
-abstract class _RqlTerm extends Object with RqlQueryRunner {
+abstract class _RqlTerm extends RqlQueryRunner {
 
   final List<_RqlTerm> _args;
   final Map _options;
@@ -141,6 +141,10 @@ class RqlTable extends _ResponseTerm {
     return new RqlUpdate(this, expr(info), options);
   }
 
+  RqlReplace replace(Map info, [Map options]){
+    return new RqlReplace(this, expr(info), options);
+  }
+
   buildQueryResponse(var response)=>response;
 }
 
@@ -204,6 +208,10 @@ class RqlUpdate extends _InsertedResponseTerm {
   RqlUpdate(term,info,Map options) : super(Term_TermType.UPDATE, [term,info], options);
 }
 
+class RqlReplace extends _InsertedResponseTerm {
+  RqlReplace(term,info,Map options) : super(Term_TermType.REPLACE, [term,info], options);
+}
+
 class RqlGet extends _GetResponseTerm {
   RqlTable table;
   RqlGet(RqlTable table, key) : super(Term_TermType.GET, [table, key])
@@ -213,6 +221,10 @@ class RqlGet extends _GetResponseTerm {
 
   RqlUpdate update(Map info, [Map options]){
     return new RqlUpdate(this, expr(info), options);
+  }
+
+  RqlReplace replace(Map info, [Map options]){
+    return new RqlReplace(this, expr(info), options);
   }
 }
 

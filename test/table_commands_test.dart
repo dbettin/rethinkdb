@@ -14,8 +14,7 @@ Future table_command_tests(conn) {
     }
 
     test("must create table", () {
-      _test(tableCreate("test_table",
-          new TableCreateOptions(primayKey: "testPk", cacheSize: 1024)), (response) => expect(response.created, isTrue));
+      _test(tableCreate("test_table",{"primaryKey": "testPk", "cacheSize" : 1024}), (response) => expect(response.created, isTrue));
     });
 
     test("must list table", () {
