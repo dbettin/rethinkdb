@@ -30,7 +30,6 @@ abstract class _RqlDatum<T> extends _RqlTerm {
 
   T value;
   _buildProtoDatum();
-
 }
 
 class _RqlDatumString extends _RqlDatum {
@@ -68,7 +67,10 @@ class _RqlDatumObject extends _RqlDatum {
     value.forEach((k,v){
       Datum_AssocPair d = new Datum_AssocPair();
       d.key = k;
-      d.val = v._buildProtoDatum();
+      if(v is _RqlDatum)
+        d.val = v._buildProtoDatum();
+      else
+        d.val = v;
       datum.rObject.add(d);});
     return datum;
   }

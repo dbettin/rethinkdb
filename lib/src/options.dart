@@ -14,13 +14,15 @@ abstract class OptionsBuilder<T> {
       if (value is bool) {
         _buildBoolOption(key, value);
       }
-
-      if (value is String) {
+      else if (value is String) {
         _buildStringOption(key, value);
       }
 
-      if (value is num) {
+      else if (value is num) {
         _buildNumOption(key, value);
+      }
+      else {
+        _addToProtoOptions(value,key);
       }
     });
   }
