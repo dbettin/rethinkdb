@@ -22,7 +22,7 @@ part 'src/config.dart';
 
 // Connection Management
 Future<_Connection> connect({String db, String host: _Connection.DEFAULT_HOST, num port: _Connection.DEFAULT_PORT,
-  String authKey: _Connection.DEFAULT_AUTH_KEY}) =>  _Connection.connect(db,host,port,authKey);
+  String authKey: _Connection.DEFAULT_AUTH_KEY}) =>  new _Connection().connect(db,host,port,authKey);
 
 
 _RqlDatabase db(String dbName,[Map options]) => new _RqlDatabase(dbName);

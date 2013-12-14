@@ -12,11 +12,11 @@ class _Connection {
   static const int _AUTHENTICATED = 4;
   static const int _CLOSED = 5;
 
-  final String _host;
-  final num _port;
-  final String _authKey;
+  String _host;
+  num _port;
+  String _authKey;
   String db;
-  final Completer _connected;
+  Completer _connected;
   Socket _socket;
   int _connection_state = _NOT_CONNECTED;
   final Map <String, List> listeners = new Map<String, List>();
@@ -25,15 +25,18 @@ class _Connection {
   final _log= new Logger('Connection');
   final _sendQueue = new Queue<_RqlQuery>();
   bool _closing = false;
+  StreamSubscription<List<int>> _socketSubscription;
 
-  _Connection._internal(this._connected, this.db, this._host, this._port, this._authKey) {
-    _connect();
-  }
+   Future<_Connection> connect(String db, String host, num port, String authKey) {
+     this._connected = new Completer();
+     this.db = db;
+     this._host = host;
+     this._port = port;
+     this._authKey = authKey;
 
-  static Future<_Connection> connect(String db, String host, num port, String authKey) {
-    var connected = new Completer();
-    var connection = new _Connection._internal(connected, db, host, port,  authKey);
-    return connected.future;
+     _connect();
+
+    return _connected.future;
   }
 
   close() {
@@ -68,6 +71,7 @@ class _Connection {
   }
 
   use(dbName) => db = dbName;
+
   noreplyWait(callback){
 
   }
@@ -87,9 +91,8 @@ class _Connection {
     Socket.connect(_host, _port).then((socket) {
       _connection_state = _CONNECTED;
       _socket = socket;
-      _socket.listen(_handleResponse, onError: _handleConnectionError, onDone: _handleClosedSocket);
+      _socketSubscription = _socket.listen(_handleResponse, onError: _handleConnectionError, onDone: _handleClosedSocket);
       _auth();
-
     }).catchError(_handleConnectionError);
   }
 
@@ -179,6 +182,34 @@ class _Connection {
     }
     return sb.toString();
   }
+}
+
+
+class MongoMessageHandler {
+  final _log = new Logger('MongoMessageTransformer');
+  final converter = new PacketConverter();
+//  final debugData = new File('debug_data1.bin').openSync(mode: FileMode.WRITE);
+void handleData(List<int> data, EventSink<MongoReplyMessage> sink) {
+  //    debugData.writeFromSync(data);
+  //    debugData.flushSync();
+  //_log.fine('handleData length=${data.length} $data');
+    converter.addPacket(data);
+    while (!converter.messages.isEmpty) {
+      var buffer = new BsonBinary.from(converter.messages.removeFirst());
+      MongoReplyMessage reply = new MongoReplyMessage();
+      reply.deserialize(buffer);
+      _log.fine(reply.toString());
+      sink.add(reply);
+    }
+  }
+  void handleDone(EventSink<MongoReplyMessage> sink) {
+    if (!converter.isClear) {
+      _log.warning('Invalid state of PacketConverter in handleDone: $converter');
+    }
+    sink.close();
+  }
+  StreamTransformer<List<int>, MongoReplyMessage> get transformer => new StreamTransformer<List<int>, MongoReplyMessage>.fromHandlers(
+      handleData: handleData,handleDone: handleDone);
 }
 
 /**
