@@ -32,7 +32,7 @@ _Note: all tests are ran against a live version of the DB._
 To execute the drivers' tests, from the root project dir, please run:
 
 ```
-tools\build.sh
+tools/build.sh
 ````
 
 
