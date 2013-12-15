@@ -1,4 +1,4 @@
-import 'lib/rethinkdb.dart';
+import 'lib/rethinkdb.dart' as r;
 import 'dart:async';
 
 main() {
@@ -6,11 +6,9 @@ main() {
    * You may specify the database, host, port, and authkey if you wish:
    * connect(db: "Website_DB", port: 8000, host: "127.0.0.1", authKey: "some key").then(...)
    */
-  connect().then((connection)=>exampleCommands(connection));
-
-
-
-
+  r.connect(db: "app_db",port: 28015).then((c)=>exampleCommands(c));
+  DateTime now =new DateTime.now();
+  print(now);
 }
 Future exampleCommands(conn)
 {
@@ -18,97 +16,77 @@ Future exampleCommands(conn)
   //dbCreate("app_db").run(conn).then((response)=>print(response));
 
 
-
+  print(conn);
   /**the use method of the connection can change the working database**/
   conn.use('app_db');
-
   /**addListener allows you to listen to changes in connection state.  'on' can be used as well.**/
   conn.addListener('close',()=>print("connection closed"));
   conn.on('connect',()=>print("connection opened"));
   conn.addListener('error',(err)=>print("Error occurred: ${err}"));
-  //conn.reconnect(); (runs conn.close() and then connect())
+  //r.table("Users").indexCreate("Name").run(conn).then((response)=>print(response));
+  r.table('Users').getAll("Roblol",{"index":"Name"})('Name').run(conn).then((response)=>print(response));
 
-
-  /**tableCreate() accepts a string for the name of the table to be created and returns a map
-     options include primary key, durability, datacenter, and cache size**/
-  //tableCreate("TableName",{'primary_key':'id','durability':'soft','cache_size':1073741824,'datacenter':'beans'}).run(conn).then((response)=>print(response));
-  //tableCreate("Users",{'primary_key':'user_id'}).run(conn).then((response)=>print(response));
-
-
-
-  /**tableList() returns a list of table names**/
-  //tableList().run(conn).then((response)=>print(response));
-
-
-
-  /**indexCreate() accepts a string for the name of a secondary index to create and returns a map**/
-  //table("Users").indexCreate("Name").run(conn).then((response)=>print(response));
-
-
-
-  /**indexList() returns a list of secondary indexes for the table**/
-  //table("Users").indexList().run(conn).then((response)=>print(response));
-
-
-
-
-  /**insert accepts either a Map or List of Maps and returns a Map, additional options can be added for durability, return_vals, and upsert**/
-  //table("Users").insert([{"Name":"Jane Doe","Age":28, 'user_id':1},{"Name":"Jon Doe","Age":24,"user_id":2},{"Name":"Jon Doe","Age":24,"user_id":3},{"Name":"Jon Doe","Age":24,"user_id":4}]).run(conn).then((response)=>print(response));
-  //table("Users").insert({"a test":"item"},{'return_vals':true}).run(conn).then((response)=>print(response));
-  //table("Users").insert({"Name":"Jane R. Doe","Age":28,"user_id":127}, {"upsert":true,"return_vals":true}).run(conn).then((response)=>print(response));
-
-
-  /**Update can be called on a table or selection from a table, only single items may return values**/
-  //table("Users").get(127).update({"Name":"Jennifer"},{'return_vals':true}).run(conn).then((response)=>print(response));
-  //table("Users").update({"Name":"Pete"}).run(conn).then((response)=>print(response));
-
-  /**updating does not support functions yet**/
-  //TODO
-  //table("Users").update({"Age" : r.row('Age').add(1) }, {"durability": 'soft'}).run(conn).then((response) => print(response));
-
-  /**Replace can be called on a table or selection from a table, only single items may return values**/
-  //table("Users").get(127).replace({"user_id" : 127, "Name" : "Jane"},{"return_vals":true}).run(conn).then((response)=>print(response));
-
-
-  /**Delete can be called on a table or selection from a table, only single items may return values, options are 'durability' and 'return_vals'**/
-  //table("Users").get(127).delete({"return_vals":true}).run(conn).then((response)=>print(response));
-  //table("Users").delete().run(conn).then((response)=>print(response));
-
-
-  /**get accepts a primary key and returns the object**/
-  //table("Users").get(127).run(conn).then((response)=>print(response));
-
-  /**getAll accepts a primary or secondary key, which is not guaranteed to be unique, either a single key value or list of values may be passed**/
-  //table("Users").getAll("Jon Doe",{"index":"Name"}).run(conn).then((response)=>print(response));
-  //table("Users").getAll(["Jon Doe", "Jane Doe"], {"index" : "Name"}).run(conn).then((response)=>print(response));
-
-  /**between gets two documents between two keys.  Accepts options arguments "index","left_bound":open/closed,"right_bound":open.closed
-   **by default, left_bound is closed, meaning it will return a records greater than OR EQUAL TO the left key
-     and right_bound is opened, meaning it will return records less than BUT NOT EQUAL TO the right key**/
-  //table("Users").between(1,3,{"left_bound":"open","right_bound":"open","index":"user_id"}).run(conn).then((response)=>print(response));
-
-  /**you can run a query on a table, it returns a list of all documents in the table**/
+  //conn.reconnect(); //(runs conn.close() and then connect())
+  //r.table("Users").run(conn).then((response)=>print(response));
+  //r.table("Users").get("45c743ef-ff5e-4987-b797-4960bc6fe10b").update({"Age":r.row("Age").add(1)}).run(conn).then((response)=>print(response));
+  //r.table('Users').update((row)=>{"Age":row('Age').sub(45)}).run(conn).then((response)=>print(response));
+  //conn.reconnect({"noreplyWait":false}).then((response)=>print(response));
+  //r.nativeTime(new DateTime.now()).run(conn).then((response)=>print(response));
+  //r.time().run(conn).then((response)=>print(response));
+  //r.tableList().run(conn).then((response)=>print(response));
+  //r.table("Users").update((row)=>{"Age":row["Age"].add(1)}).run(conn).then((response)=>print(response));
+  //dbList().run(conn).then((response)=>print(response));
+  //db("test").tableCreate("Feet").run(conn).then((response)=>print(response));
+  //table("Users").indexStatus(["Name","occupation"]).run(conn).then((response)=>print(response));
+  //TODO fix 'do'
+  //doIt(table('marvel').get('IronMan'),lambda ironman: ironman['name']);
+  //doIt("bee",4,"dags").run(conn).then((response)=>print(response));
+  //table("Users").insert({"Name":"Tim"}).run(conn).then((response)=>print(response));
+  //r.db("app_db").tableCreate("Users2").run(conn).then((response)=>print(response));
+  //r.db("app_db").tableList().run(conn).then((response)=>print(response));
+  //table("Users").filter(table("Users")).run(conn).then((response)=>print(response));
+  //table("Users").getAll("Name")["Age"].run(conn).then((response)=>print(response));
+  //expr(3).le(2).run(conn).then((response)=>print(response));
+  //row("dogs").run(conn).then((response)=>print(response));
   //table("Users").run(conn).then((response)=>print(response));
+  //table("Users",{'use_outdated':true}).run(conn).then((response)=>print(response));
+  //dbCreate("farts").run(conn).then((response)=>print(response));
+  //dbDrop("farts").run(conn).then((response)=>print(response));
+  //dbList().run(conn).then((response)=>print(response));
+  //tableCreate("Farts2",{"primary_key":"beans"}).run(conn).then((response)=>print(response));
+  //tableDrop("Farts1").run(conn).then((response)=>print(response));
+  //tableDrop("Farts2").run(conn).then((response)=>print(response));
+  //tableList().run(conn).then((response)=>print(response));
+  //branch("head","feet","legs").run(conn).then((response)=>print(response));
+  //tableList().count().run(conn).then((response)=>print(response));
+  //table('Users').groupBy(['age','location'],avg('Age')).run(conn).then((response)=>print(response));
+  //table('Users').orderBy(asc('user_id')).run(conn).then((response)=>print(response));
+  //expr('thing').eq('thing2').run(conn).then((response)=>print(response));
+  //expr('thing').ne('thing2').run(conn).then((response)=>print(response));
+  //expr(["a","cool"]).add(["dog"]).run(conn).then((response)=>print(response));
+  //expr(4).sub(23).run(conn).then((response)=>print(response));
+  //expr([4,5]).mul(2).run(conn).then((response)=>print(response));
+  //expr(7).div(2).run(conn).then((response)=>print(response));
+  //expr(7).mod(2).run(conn).then((response)=>print(response));
+  //table("Users").info().run(conn).then((response)=>print(response));
+  //time(1986, 11, 3, 'M').run(conn).then((response)=>print(response));
+  //ISO8601('1986-11-03T08:30:00-07:00','Z').run(conn).then((response)=>print(response));
+  //epochTime(531360000).run(conn).then((response)=>print(response));
+  //now().run(conn).then((response)=>print(response));
+  //now().inTimezone('-08:00').run(conn).then((response)=>print(response));
+  //table("Users").info().run(conn).then((response)=>print(response));
+  //table("Users").indexCreate("aAge").run(conn).then((response)=>print(response));
+  //table("Users").info().run(conn).then((response)=>print(response));
+  //table("Users").info().run(conn).then((response)=>print(response));
+  //table("Users").indexDrop("aAge").run(conn).then((response)=>print(response));
+  //table("Users").info().run(conn).then((response)=>print(response));
 
-  /**filter can be called on a sequence, selection or field and returns the same.**/
-  //table("Users").filter({"Name":"Jon Doe"}).run(conn).then((response)=>print(response));
-  //table("Users").getAll("Jon Doe", {"index":"Name"}).filter({"user_id":21}).run(conn).then((response)=>print(response));
+  //TODO fix indexStatus and indexWait
+  //table("Users").indexStatus("Name").run(conn).then((response)=>print(response));
+  //table("Users").indexWait().run(conn).then((response)=>print(response));
 
-  /**count() returns the number of objects in a table**/
-  //table("Users").count().run(conn).then((response)=>print(response));
+  //table("Users").insert({"Name":"Face","occupation":"party"},{"durability": 'soft', "return_vals": true, "upsert":true}).run(conn).then((response)=>print(response));
 
-
-  /**tableDrop() accepts a string for the name of the table to be dropped and returns a map**/
-  //tableDrop("Users").run(conn).then((response)=>print(response));
-
-
-  /**dbDrop() accepts a string for the name of the database to be dropped  and returns a map**/
-  //dbDrop("app_db").run(conn).then((response)=>print(response));
-
-
-
-  /**dbList() returns a list of database names**/
-  //dbList().run(conn).then((response)=>print(response);conn.close(););
 
 
 }

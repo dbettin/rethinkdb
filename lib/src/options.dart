@@ -49,7 +49,7 @@ abstract class OptionsBuilder<T> {
   }
 
   _addToProtoOptions(term, key) {
-    _protoOptions.add(_buildPair(term._buildProtoTerm(), key));
+    _protoOptions.add(_buildPair(term.build(), key));
   }
 
   T _buildPair(term, key);

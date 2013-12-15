@@ -5,19 +5,16 @@ import 'dart:io';
 import 'dart:collection';
 import 'package:fixnum/fixnum.dart';
 import 'package:logging/logging.dart';
+import 'dart:typed_data';
 import 'src/generated/ql2.pb.dart';
 import 'dart:convert';
 import 'dart:mirrors';
 part 'src/connection.dart';
 part 'src/exceptions.dart';
-part 'src/response.dart';
 part 'src/term.dart';
 part 'src/datum.dart';
 part 'src/query.dart';
 part 'src/options.dart';
-part 'src/RqlMessageHandler.dart';
-part 'src/config.dart';
-
 
 
 // Connection Management
@@ -38,11 +35,12 @@ _RqlTableDrop tableDrop(String tableName,[Map options]) => new _RqlTableDrop(tab
 _RqlAsc asc(String attr) => new _RqlAsc(attr);
 _RqlDesc desc(String attr) => new _RqlDesc(attr);
 _RqlTime time(int year,int month,int day,String timezone,[int hour,int minute,num second]) => new _RqlTime(year, month, day,timezone,hour, minute, second);
-_RqlISO8601 ISO8601(stringTime,[default_time_zone]) => new _RqlISO8601(stringTime,default_time_zone);
+_RqlTime nativeTime(time) => new _RqlTime.nativeTime(time);
+_RqlISO8601 ISO8601(stringTime,[default_time_zone="Z"]) => new _RqlISO8601(stringTime,default_time_zone);
 _RqlEpochTime epochTime(eptime) => new _RqlEpochTime(eptime);
 _RqlNow now() => new _RqlNow();
 
-_RqlDo reqlDo(arg,[args,expr]) => new _RqlDo([arg,args,expr]);
+_RqlDo reqlDo(arg,[args,expr]) => new _RqlDo(arg,[args],expr);
 _RqlBranch branch(test,trueBranch,falseBranch) => new _RqlBranch(test,trueBranch,falseBranch);
 _RqlError error(String message) => new _RqlError(message);
 _RqlJs js(String js) => new _RqlJs(js);
@@ -52,6 +50,3 @@ Map count = {"COUNT":true};
 Map sum(String attr) => {'SUM':attr};
 Map avg(String attr) => {"AVG": attr};
 _RqlImplicitVar row(String rowName) => new _RqlImplicitVar();
-
-
-

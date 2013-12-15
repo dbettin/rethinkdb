@@ -1,10 +1,11 @@
 name: rethinkdb
+author: William Welch <billywelch@gmail.com>
 version: 0.1.0
-author: Dave Bettin <me@davebettin.com>
+homepage: https://github.com/billysometimes/rethinkdb
 description: Dart driver for RethinkDB.
-homepage: https://github.com/dbettin/rethinkdb
-documentation: https://github.com/dbettin/rethinkdb/blob/master/README.md
+documentation: https://github.com/billysometimes/rethinkdb
 dependencies:
+  logging: any
   protobuf:
     git: https://github.com/dart-lang/dart-protobuf.git
     version: '>=0.1.0'

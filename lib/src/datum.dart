@@ -21,7 +21,7 @@ _buildDatumResponseValue(Datum datum) {
 abstract class _RqlDatum<T> extends _RqlTerm {
   _RqlDatum() : super(Term_TermType.DATUM);
 
-  Term _buildProtoTerm() {
+  Term build() {
     var term = new Term();
     term.type = _termType;
     term.datum = _buildProtoDatum();
