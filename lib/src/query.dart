@@ -16,7 +16,6 @@ class _RqlQuery {
     token = tokenCounter++;
     _protoQuery.token =  token;
     _protoQuery.query = _term.build();
-    print(_protoQuery);
 
     if (options != null) {
       new QueryOptionsBuilder(_protoQuery.globalOptargs).buildProtoOptions(options);
