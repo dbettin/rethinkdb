@@ -5,8 +5,6 @@ A [Dart](http://www.dartlang.org) driver for [RethinkDB](http://www.rethinkdb.co
 
 This project is a fork of [Dave Bettins rethink driver](https://github.com/dbettin/rethinkdb)
 
-Not all functionality has been implemented.
-
 
 Getting Started:
 ========
