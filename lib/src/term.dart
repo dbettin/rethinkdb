@@ -158,8 +158,8 @@ abstract class _RqlTerm {
 
   _RqlCount count([filter]){
     if(filter == null)
-      new _RqlCount(this);
-    new _RqlCount(this,_funcWrap(filter));
+      return new _RqlCount(this);
+    return new _RqlCount(this,_funcWrap(filter));
   }
 
   _RqlUnion union(sequence) => new _RqlUnion(this,sequence);
@@ -355,6 +355,24 @@ class _RqlTable extends _RqlTerm {
 
 class _RqlTableWithDb extends _RqlTerm {
   _RqlTableWithDb(db,tableName, [options]):super(Term_TermType.TABLE,[db,tableName],options);
+
+  _RqlInsert insert(records,[options]) => new _RqlInsert(this,records,options);
+
+  _RqlGet get(key) => new _RqlGet(this,key);
+
+  _RqlGetAll getAll(keys,[options]) => new _RqlGetAll(_listify(keys),options);
+
+  _RqlIndexCreate indexCreate(index,[indexFunction]) => new _RqlIndexCreate(this,index,_funcWrap(indexFunction));
+
+  _RqlIndexDrop indexDrop(index) => new _RqlIndexDrop(this,index);
+
+  _RqlIndexList indexList() => new _RqlIndexList(this);
+
+  _RqlIndexStatus indexStatus([index]) => new _RqlIndexStatus(_listify(index));
+
+  _RqlIndexWait indexWait([index]) =>  new _RqlIndexWait(_listify(index));
+
+  _RqlSync sync() => new _RqlSync(this);
 }
 
 class _RqlGet extends _RqlTerm {

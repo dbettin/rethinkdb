@@ -12,14 +12,15 @@ Future exampleCommands(conn)
 {
   /**dbCreate() takes a string for the name of the database to be created and returns a CreatedResponse**/
   //r.dbCreate("app_db").run(conn).then((response)=>print(response));
-
+  r.dbDrop("testdb").run(conn).then((response)=>print(response));
   /**the use method of the connection can change the working database**/
-  conn.use('app_db');
-
+  r.dbList().run(conn).then((response)=>print(response));
+  //r.dbList().run(conn).then((response)=>print(response[0]));
+  //r.table('Users').count().run(conn).then((response)=>print(response));
+  //r.db("testdb").tableList().run(conn).then((response)=>print(response));
+  //r.db("testdb").table("test_table").indexList().run(conn).then((response)=>print(response));
+  //r.dbCreate("testdb").run(conn).then((response)=>print(response));
   /**addListener allows you to listen to changes in connection state.  'on' can be used as well.**/
-  conn.addListener('close',()=>print("connection closed"));
-  conn.on('connect',()=>print("connection opened"));
-  conn.addListener('error',(err)=>print("Error occurred: ${err}"));
 
   /**for more information check out the rethinkdb javascript API.**/
 
