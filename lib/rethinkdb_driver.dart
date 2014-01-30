@@ -25,13 +25,13 @@ part 'src/options.dart';
  * db: the default database (defaults to test).
  * authKey: the authentication key (default none).
  */
-Future<_Connection> connect({String db, String host: _Connection.DEFAULT_HOST, num port: _Connection.DEFAULT_PORT,
-  String authKey: _Connection.DEFAULT_AUTH_KEY}) =>  new _Connection().connect(db,host,port,authKey);
+Future<_RqlConnection> connect({String db, String host: _RqlConnection.DEFAULT_HOST, num port: _RqlConnection.DEFAULT_PORT,
+  String authKey: _RqlConnection.DEFAULT_AUTH_KEY}) =>  new _RqlConnection().connect(db,host,port,authKey);
 
 /**
  *Reference a database.This command can be chained with other commands to do further processing on the data.
  */
-_RqlDatabase db(String dbName,[Map options]) => new _RqlDatabase(dbName);
+ _RqlDatabase db(String dbName) => new _RqlDatabase(dbName);
 
 /**
  * Create a database. A RethinkDB database is a collection of tables, similar to relational databases.
@@ -56,7 +56,7 @@ _RqlDbList dbList() => new _RqlDbList();
 /**
  * Select all documents in a table. This command can be chained with other commands to do further processing on the data.
  */
-_RqlTable table(String tableName,[Map options]) => new _RqlTable(tableName,options);
+ _RqlTable table(String tableName,[Map options]) => new _RqlTable(tableName,options);
 /**
  * Create a table. A RethinkDB table is a collection of JSON documents.
  * If successful, the operation returns an object: {created: 1}. If a table with the same name already exists, the operation throws RqlRuntimeError.
@@ -94,7 +94,7 @@ _RqlTime time(int year,int month,int day,String timezone,[int hour,int minute,nu
  * Create a time object from a Dart DateTime object.
  * Not working yet
  */
-_RqlTime nativeTime(time) => new _RqlTime.nativeTime(time);
+_RqlTime nativeTime(DateTime time) => new _RqlTime.nativeTime(time);
 
 /**
  * Create a time object based on an iso8601 date-time string (e.g. '2013-01-01T01:01:01+00:00').
@@ -102,13 +102,13 @@ _RqlTime nativeTime(time) => new _RqlTime.nativeTime(time);
  * If you pass an ISO 8601 date-time without a time zone, you must specify the time zone with the optarg default_timezone.
  *
  */
-_RqlISO8601 ISO8601(stringTime,[default_time_zone="Z"]) => new _RqlISO8601(stringTime,default_time_zone);
+_RqlISO8601 ISO8601(String stringTime,[default_time_zone="Z"]) => new _RqlISO8601(stringTime,default_time_zone);
 
 /**
  * Create a time object based on seconds since epoch.
  *  The first argument is a double and will be rounded to three decimal places (millisecond-precision).
  */
-_RqlEpochTime epochTime(eptime) => new _RqlEpochTime(eptime);
+_RqlEpochTime epochTime(int eptime) => new _RqlEpochTime(eptime);
 
 /**
  * Return a time object representing the current time in UTC.
@@ -123,10 +123,8 @@ _RqlNow now() => new _RqlNow();
 _RqlDo reqlDo(arg,[args,expr]) => new _RqlDo(arg,[args],expr);
 
 /**
- * If the test expression returns false or null, the false_branch will be executed.
- * In the other cases, the true_branch is the one that will be evaluated.
- * The branch command is effectively an if renamed due to language constraints.
- * The type of the result is determined by the type of the branch that gets executed.
+ * If the test expression returns false or null, the [falseBranch] will be executed.
+ * In the other cases, the [trueBranch] is the one that will be evaluated.
  */
 _RqlBranch branch(test,trueBranch,falseBranch) => new _RqlBranch(test,trueBranch,falseBranch);
 
@@ -164,3 +162,19 @@ Map avg(String attr) => {"AVG": attr};
  * Returns the currently visited document.
  */
 _RqlImplicitVar row(String rowName) => new _RqlImplicitVar();
+
+/**
+ * Adds fields to an object
+ */
+
+_RqlObject object(arg1,arg2) => new _RqlObject(arg1,arg2);
+
+/**
+ * change the string to uppercase
+ */
+ _RqlUpcase upcase(String str) => new _RqlUpcase(str);
+
+ /**
+  * Change a string to lowercase
+  */
+ _RqlDowncase downcase(String str) => new _RqlDowncase(str);

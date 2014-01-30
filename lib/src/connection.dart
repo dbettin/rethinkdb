@@ -1,6 +1,6 @@
 part of rethinkdb;
 
-class _Connection {
+class _RqlConnection {
   static const String DEFAULT_HOST = "127.0.0.1";
   static const num DEFAULT_PORT = 28015;
   static const String DEFAULT_AUTH_KEY = "";
@@ -15,11 +15,11 @@ class _Connection {
   String _host;
   num _port;
   String _authKey;
-  String db;
+  String _db;
   Completer _connected;
   Socket _socket;
   int _connection_state = _NOT_CONNECTED;
-  final Map <String, List> listeners = new Map<String, List>();
+  final Map <String, List> _listeners = new Map<String, List>();
   final Map _options = new Map();
 
   final _replyQueries = new Map<Int64, _RqlQuery>();
@@ -28,9 +28,9 @@ class _Connection {
   bool _closing = false;
   StreamSubscription<List<int>> _socketSubscription;
 
-   Future<_Connection> connect(String db, String host, num port, String authKey) {
+   Future<_RqlConnection> connect(String db, String host, num port, String authKey) {
      this._connected = new Completer();
-     this.db = db;
+     this._db = db;
      this._host = host;
      this._port = port;
      this._authKey = authKey;
@@ -39,10 +39,12 @@ class _Connection {
 
     return _connected.future;
   }
-
-  close() {
-    if(listeners["close"] != null)
-      listeners["close"].forEach((func)=>func());
+  /**
+   * Closes the current connection
+   */
+  void close() {
+    if(_listeners["close"] != null)
+      _listeners["close"].forEach((func)=>func());
     _closing = true;
     while (!_sendQueue.isEmpty){
       _sendBuffer();
@@ -52,30 +54,45 @@ class _Connection {
     _replyQueries.clear();
   }
 
-  reconnect() {
+  /**
+   * closes and reopens the current connection
+   */
+  void reconnect() {
     close();
     _connect();
   }
-  on(String key, Function val)
+
+  /**
+   * Alias for addListener
+  */
+  void on(String key, Function val)
   {
     addListener(key,val);
   }
-
-  addListener(String key, Function val)
+  /**
+   * Adds a listener to the connection.
+   */
+  void addListener(String key, Function val)
   {
     List currentListeners = [];
-    if(listeners != null && listeners[key] != null)
-      listeners[key].forEach((element)=>currentListeners.add(element));
+    if(_listeners != null && _listeners[key] != null)
+      _listeners[key].forEach((element)=>currentListeners.add(element));
 
     currentListeners.add(val);
-    listeners[key] = currentListeners;
+    _listeners[key] = currentListeners;
+  }
+  /**
+   * Changes current database to [dbName]
+   */
+  String use(String dbName) => _db = dbName;
+
+  /**
+   *  ensures that previous queries with noreply flag have been processed by the server.
+   */
+  void noreplyWait(Function callback){
+
   }
 
-  use(dbName) => db = dbName;
-
-  noreplyWait(callback){
-
-  }
   _sendBuffer() {
     if (!_sendQueue.isEmpty) {
       _RqlQuery query = _sendQueue.removeFirst();
@@ -88,8 +105,8 @@ class _Connection {
   }
 
   _connect() {
-    if(listeners["connect"] != null)
-      listeners["connect"].forEach((func)=>func());
+    if(_listeners["connect"] != null)
+      _listeners["connect"].forEach((func)=>func());
     Socket.connect(_host, _port).then((socket) {
       _closing = false;
       _connection_state = _CONNECTED;
@@ -109,8 +126,8 @@ class _Connection {
   }
 
   _handleConnectionError(error) {
-    if(listeners["error"] != null)
-      listeners["error"].forEach((func)=>func(error));
+    if(_listeners["error"] != null)
+      _listeners["error"].forEach((func)=>func(error));
 
     if (error is! RqlConnectionException) {
       error = new RqlConnectionException("Failed to connect with message: ${error.message}.", error);
@@ -178,10 +195,10 @@ class _Connection {
   }
 
   _updateCurrentDatabase(query) {
-    if (this.db != null && this.db.isNotEmpty) {
+    if (this._db != null && this._db.isNotEmpty) {
       var pair = new Query_AssocPair();
       pair.key = "db";
-      pair.val = new _RqlDatabase(this.db).build();
+      pair.val = new _RqlDatabase(this._db).build();
       query._protoQuery.globalOptargs.add(pair);
     }
   }

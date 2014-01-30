@@ -2,7 +2,7 @@ library rethinkdb_test;
 
 import 'dart:async';
 import 'package:unittest/unittest.dart';
-import 'package:rethinkdb/rethinkdb.dart' as r;
+import '../lib/rethinkdb_driver.dart' as r;
 
 part 'connection_test.dart';
 part 'db_commands_test.dart';

@@ -81,8 +81,6 @@ class TermOptionsBuilder extends OptionsBuilder {
 }
 
 
-abstract class RqlOptions {
-  final Map<String, dynamic> options = {};
-}
+
 
 

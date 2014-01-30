@@ -16,7 +16,7 @@ abstract class _RqlTerm {
     });
   }
 
-  Future run(_Connection connection, [global_opt_args])
+  Future run(_RqlConnection connection, [global_opt_args])
   {
     var query = new _RqlQuery(this,global_opt_args);
     return connection._start(query);
@@ -221,6 +221,10 @@ abstract class _RqlTerm {
 
   _RqlInTimezone inTimezone(tz) => new _RqlInTimezone(this,tz);
 
+  _RqlUpcase upcase() => new _RqlUpcase(this);
+
+  _RqlDowncase downcase() => new _RqlDowncase(this);
+
   _listify(item,[needsWrap=false]) {
     if(needsWrap)
       _funcWrap(item);
@@ -323,48 +327,27 @@ class _RqlDatabase extends _RqlTerm {
 
    _RqlTableList tableList() => new _RqlTableList(this);
 
-   _RqlTableCreateFromDb tableCreate(tableName,[options]) => new _RqlTableCreateFromDb(this,tableName,options);
+   _RqlTableCreateFromDb tableCreate(String tableName,[Map options]) => new _RqlTableCreateFromDb(this,tableName,options);
 
-   _RqlTableDropFromDb tableDrop(tableName) => new _RqlTableDropFromDb(this,tableName);
+   _RqlTableDropFromDb tableDrop(String tableName) => new _RqlTableDropFromDb(this,tableName);
 
-   _RqlTableWithDb table(tableName) => new _RqlTableWithDb(this,tableName);
+    _RqlTable table(String tableName) => new _RqlTable.fromDb(this,tableName);
 }
 
 class _RqlTable extends _RqlTerm {
-  _RqlTable(tbl_name, [options]):super(Term_TermType.TABLE,[tbl_name], options);
+  _RqlTable(String tableName, [options]):super(Term_TermType.TABLE,[tableName], options);
 
-
-  _RqlInsert insert(records,[options]) => new _RqlInsert(this,records,options);
-
-  _RqlGet get(key) => new _RqlGet(this,key);
-
-  _RqlGetAll getAll(keys,[options]) => new _RqlGetAll(_listify(keys),options);
-
-  _RqlIndexCreate indexCreate(index,[indexFunction]) => new _RqlIndexCreate(this,index,_funcWrap(indexFunction));
-
-  _RqlIndexDrop indexDrop(index) => new _RqlIndexDrop(this,index);
-
-  _RqlIndexList indexList() => new _RqlIndexList(this);
-
-  _RqlIndexStatus indexStatus([index]) => new _RqlIndexStatus(_listify(index));
-
-  _RqlIndexWait indexWait([index]) =>  new _RqlIndexWait(_listify(index));
-
-  _RqlSync sync() => new _RqlSync(this);
-}
-
-class _RqlTableWithDb extends _RqlTerm {
-  _RqlTableWithDb(db,tableName, [options]):super(Term_TermType.TABLE,[db,tableName],options);
+  _RqlTable.fromDb(_RqlDatabase db, String tableName,[options]):super(Term_TermType.TABLE,[db,tableName],options);
 
   _RqlInsert insert(records,[options]) => new _RqlInsert(this,records,options);
 
-  _RqlGet get(key) => new _RqlGet(this,key);
+  _RqlGet get(String key) => new _RqlGet(this,key);
 
   _RqlGetAll getAll(keys,[options]) => new _RqlGetAll(_listify(keys),options);
 
-  _RqlIndexCreate indexCreate(index,[indexFunction]) => new _RqlIndexCreate(this,index,_funcWrap(indexFunction));
+  _RqlIndexCreate indexCreate(String index,[Function indexFunction]) => new _RqlIndexCreate(this,index,_funcWrap(indexFunction));
 
-  _RqlIndexDrop indexDrop(index) => new _RqlIndexDrop(this,index);
+  _RqlIndexDrop indexDrop(String index) => new _RqlIndexDrop(this,index);
 
   _RqlIndexList indexList() => new _RqlIndexList(this);
 
@@ -740,7 +723,19 @@ class _RqlDefault extends _RqlTerm {
   _RqlDefault(obj,value) : super(Term_TermType.DEFAULT,[obj,value]);
 }
 
-expr(val)
+class _RqlObject extends _RqlTerm {
+  _RqlObject(arg1,arg2) : super(Term_TermType.OBJECT,[arg1,arg2]);
+}
+
+class _RqlUpcase extends _RqlTerm {
+  _RqlUpcase(str) : super(Term_TermType.UPCASE,[str]);
+}
+
+class _RqlDowncase extends _RqlTerm {
+  _RqlDowncase(str) : super(Term_TermType.DOWNCASE,[str]);
+}
+
+_RqlTerm expr(val)
 {
   if(val is _RqlTerm)
     return val;

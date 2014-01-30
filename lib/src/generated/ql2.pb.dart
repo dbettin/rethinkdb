@@ -370,6 +370,7 @@ class Term_TermType extends ProtobufEnum {
   static const Term_TermType CONTAINS = const Term_TermType._(93, 'CONTAINS');
   static const Term_TermType GET_FIELD = const Term_TermType._(31, 'GET_FIELD');
   static const Term_TermType KEYS = const Term_TermType._(94, 'KEYS');
+  static const Term_TermType OBJECT = const Term_TermType._(143, 'OBJECT');
   static const Term_TermType HAS_FIELDS = const Term_TermType._(32, 'HAS_FIELDS');
   static const Term_TermType WITH_FIELDS = const Term_TermType._(96, 'WITH_FIELDS');
   static const Term_TermType PLUCK = const Term_TermType._(33, 'PLUCK');
@@ -507,6 +508,7 @@ class Term_TermType extends ProtobufEnum {
     CONTAINS,
     GET_FIELD,
     KEYS,
+    OBJECT,
     HAS_FIELDS,
     WITH_FIELDS,
     PLUCK,

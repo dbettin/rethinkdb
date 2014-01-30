@@ -22,18 +22,12 @@ The driver api tries to align with the javascript and python RethinkDB drivers. 
     import 'lib/rethinkdb.dart';
   ````
   to your project.
-
-Running Tests:
-========
-
-Install the latest version of RethinkDB locally and run with the defaults.
-_Note: all tests are ran against a live version of the DB._
-
-To execute the drivers' tests, from the root project dir, please run:
-
-```
-tools/build.sh
-````
+  
+  or add the package to your pubspec.yaml file:
+  ```
+  dependencies:
+    rethinkdb_driver: '>=0.2.0'
+  ````
 
 
 
