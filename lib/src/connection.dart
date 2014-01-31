@@ -44,11 +44,17 @@ class _RqlConnection {
   /**
    * Closes the current connection
    */
-  void close([opts,callback]) {
+  void close([opts]) {
+    bool noReply = false;
+    if(opts != null){
+      if(opts["noreplyWait"] != null){
+        noReply = opts["noreplyWait"];
+      }
+    }
     if(_listeners["close"] != null)
       _listeners["close"].forEach((func)=>func());
       _closing = true;
-    while (!_sendQueue.isEmpty){
+    while (!_sendQueue.isEmpty && noReply == false){
       _sendBuffer();
     }
     _sendQueue.clear();
@@ -59,8 +65,8 @@ class _RqlConnection {
   /**
    * closes and reopens the current connection
    */
-  void reconnect() {
-    close();
+  void reconnect([opts]) {
+    close(opts);
     _connect();
   }
 
