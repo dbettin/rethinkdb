@@ -26,6 +26,8 @@ class _RqlConnection {
   final _log= new Logger('Connection');
   final _sendQueue = new Queue<_RqlQuery>();
   bool _closing = false;
+
+  Map _outstandingCallbacks = {};
   StreamSubscription<List<int>> _socketSubscription;
 
    Future<_RqlConnection> connect(String db, String host, num port, String authKey) {
@@ -42,10 +44,10 @@ class _RqlConnection {
   /**
    * Closes the current connection
    */
-  void close() {
+  void close([opts,callback]) {
     if(_listeners["close"] != null)
       _listeners["close"].forEach((func)=>func());
-    _closing = true;
+      _closing = true;
     while (!_sendQueue.isEmpty){
       _sendBuffer();
     }
@@ -89,11 +91,13 @@ class _RqlConnection {
   /**
    *  ensures that previous queries with noreply flag have been processed by the server.
    */
-  void noreplyWait(Function callback){
-
+  //TODO write this
+  void noreplyWait(){
+      _RqlQuery query = new _RqlQuery.fromConn(Query_QueryType.NOREPLY_WAIT,null,null);
+      _start(query);
   }
 
-  _sendBuffer() {
+  _RqlQuery _sendBuffer() {
     if (!_sendQueue.isEmpty) {
       _RqlQuery query = _sendQueue.removeFirst();
       Uint8List buffer = query._buffer;
@@ -104,7 +108,7 @@ class _RqlConnection {
     }
   }
 
-  _connect() {
+  void _connect() {
     if(_listeners["connect"] != null)
       _listeners["connect"].forEach((func)=>func());
     Socket.connect(_host, _port).then((socket) {
@@ -116,7 +120,7 @@ class _RqlConnection {
     }).catchError(_handleConnectionError);
   }
 
-  _auth() {
+  void _auth() {
     _connection_state = _AUTHENTICATING;
     List<int> message =
         _toBytes(_PROTOCOL_VERSION)
@@ -125,7 +129,7 @@ class _RqlConnection {
     _socket.add(message);
   }
 
-  _handleConnectionError(error) {
+  void _handleConnectionError(error) {
     if(_listeners["error"] != null)
       _listeners["error"].forEach((func)=>func(error));
 
@@ -143,7 +147,7 @@ class _RqlConnection {
 
   }
 
-  _handleResponse(Uint8List response) {
+  void _handleResponse(Uint8List response) {
     if (_connection_state == _AUTHENTICATED) {
       _handleProtoResponse(response);
     } else {
@@ -151,13 +155,13 @@ class _RqlConnection {
     }
   }
 
-  _handleProtoResponse(Uint8List response) {
+  void _handleProtoResponse(Uint8List response) {
    Response protoResponse = new Response.fromBuffer(response.sublist(4));
    _RqlQuery correlatedQuery = _replyQueries.remove(protoResponse.token);
    correlatedQuery._handleProtoResponse(protoResponse);
   }
 
-  _handleAuthResponse(Uint8List response) {
+  void _handleAuthResponse(Uint8List response) {
     String response_message = _fromBytes(response);
     if (response_message == "SUCCESS") {
       _connection_state = _AUTHENTICATED;
@@ -170,7 +174,7 @@ class _RqlConnection {
     }
   }
 
-  _handleClosedSocket() {
+  void _handleClosedSocket() {
     _connection_state = _CLOSED;
   }
 
@@ -194,7 +198,7 @@ class _RqlConnection {
 
   }
 
-  _updateCurrentDatabase(query) {
+  void _updateCurrentDatabase(query) {
     if (this._db != null && this._db.isNotEmpty) {
       var pair = new Query_AssocPair();
       pair.key = "db";

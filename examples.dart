@@ -36,11 +36,18 @@ Future exampleCommands(conn)
 
 
 
+  /** noreplyWait() waits for any queries with the noreply option to run**/
+
+  //conn.noreplyWait();
+
+
+
   /**addListener allows you to listen to changes in connection state. 'on' can be used as well.**/
 
   //conn.addListener("error",(err)=>print(err));
 
   //conn.on("close",()=>print("Connection Closed!"));
+
 
 
   /**table() selects a table for the given database**/

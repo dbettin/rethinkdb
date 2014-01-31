@@ -21,6 +21,12 @@ class _RqlQuery {
       new QueryOptionsBuilder(_protoQuery.globalOptargs).buildProtoOptions(options);
     }
   }
+  _RqlQuery.fromConn(_type,this._term,this.options){
+    _protoQuery = new Query();
+    _protoQuery.type = _type;
+    token = tokenCounter++;
+    _protoQuery.token = token;
+  }
   _handleProtoResponse(Response protoResponse) {
     if (options != null && options["noReply"]==true) {
       _query.complete();
@@ -47,6 +53,9 @@ class _RqlQuery {
         case Response_ResponseType.RUNTIME_ERROR:
           var datum = protoResponse.response.first;
           _query.completeError(datum.rStr);
+          break;
+        case Response_ResponseType.WAIT_COMPLETE:
+          _query.complete();
           break;
         default:
           var datum = protoResponse.response.first;
