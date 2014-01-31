@@ -19,7 +19,7 @@ The driver api tries to align with the javascript and python RethinkDB drivers. 
 
   to include this driver in your own project add:
   ```
-    import 'lib/rethinkdb.dart';
+    import 'lib/rethinkdb_driver.dart';
   ````
   to your project.
   
@@ -28,6 +28,10 @@ The driver api tries to align with the javascript and python RethinkDB drivers. 
   dependencies:
     rethinkdb_driver: '>=0.2.0'
   ````
+  and import the package into your project:
+  ```
+    import 'package:rethinkdb_driver/rethinkdb_driver.dart'; 
+  ````  
 
 
 
