@@ -1,121 +1,881 @@
 part of rethinkdb;
 
-///
-/// Base Terms
-///
-abstract class _RqlTerm extends Object with RqlQueryRunner {
+abstract class _RqlTerm {
 
-  final List<_RqlTerm> _args;
-  final RqlOptions _options;
-  Term_TermType _termType;
+  List<_RqlTerm> _args=[];
+  Map _options = {};
+  final Term_TermType _termType;
 
 
-  _RqlTerm(Term_TermType this._termType, [List<_RqlTerm> this._args, RqlOptions this._options]);
+  _RqlTerm(Term_TermType this._termType, [List args, Map options]){
+    if(args != null)
+      args.forEach((e)=> this._args.add(expr(e)));
+    if(options != null)
+    options.forEach((k,v){
+      this._options[k] = expr(options[k]);
+    });
+  }
 
-  Term _buildProtoTerm() {
-    var term = new Term();
-    term.type = _termType;
-    if (_args != null) {
+  Future run(_RqlConnection connection, [global_opt_args])
+  {
+    var query = new _RqlQuery(this,global_opt_args);
+    return connection._start(query);
+  }
+
+  Term build(){
+    Term term = new Term();
+    term.type = this._termType;
+    if(_args != null)
       _args.forEach((arg) {
-        var argTerm = arg._buildProtoTerm();
-        term.args.add(argTerm);
+        if(arg!=null){
+          var argTerm = arg.build();
+          term.args.add(argTerm);
+        }
       });
-
       if (_options != null) {
-        new TermOptionsBuilder(term.optargs).buildProtoOptions(_options.options);
+        new TermOptionsBuilder(term.optargs).buildProtoOptions(_options);
       }
-    }
 
     return term;
+
+  }
+
+  //Comparison Operators
+  _RqlEq eq(val) => new _RqlEq(this,val);
+
+  _RqlNe ne(val) => new _RqlNe(this,val);
+
+  _RqlLt lt(val) => new _RqlLt(this,val);
+
+  _RqlLe le(val) => new _RqlLe(this,val);
+
+  _RqlGt gt(val) => new _RqlGt(this,val);
+
+  _RqlGe ge(val) => new _RqlGe(this,val);
+
+  //Numeric Operators
+  _RqlNot not() => new _RqlNot(this);
+
+  _RqlAdd add(number) => new _RqlAdd(this,number);
+
+  _RqlSub sub(number) => new _RqlSub(this,number);
+
+  _RqlMul mul(number) => new _RqlMul(this,number);
+
+  _RqlDiv div(number) => new _RqlDiv(this,number);
+
+  _RqlMod mod(number) => new _RqlMod(this,number);
+
+  _RqlAnd and(b) => new _RqlAnd(this,b);
+
+  _RqlOr or(b) => new _RqlOr(this,b);
+
+
+  _RqlContains contains(items) => new _RqlContains(_listify(items,true));
+
+  _RqlHasFields hasFields(items) => new _RqlHasFields(_listify(items));
+
+  _RqlWithFields withFields([fields]) => new _RqlWithFields(_listify(fields));
+
+  _RqlKeys keys() => new _RqlKeys(this);
+
+  //Polymorphic object/sequence operations
+  _RqlPluck pluck(items) => new _RqlPluck(_listify(items));
+
+  _RqlWithout without(items) => new _RqlWithout(_listify(items));
+
+  _RqlDo reqlDo(arg,expr) => new _RqlDo(this, arg,_funcWrap(expr));
+
+  _RqlDefault defaultTo(value) => new _RqlDefault(this,value);
+
+  _RqlUpdate update(expr,[options]) => new _RqlUpdate(this,_funcWrap(expr),options);
+
+  _RqlReplace replace(expr, [options]) => new _RqlReplace(this,_funcWrap(expr),options);
+
+  _RqlDelete delete([options]) => new _RqlDelete(this,options);
+
+  //Type inspection
+  _RqlCoerceTo coerceTo(String type) => new _RqlCoerceTo(this,type);
+
+  _RqlTypeOf typeOf() => new _RqlTypeOf(this);
+
+  _RqlMerge merge(obj) => new _RqlMerge(this,obj);
+
+  _RqlAppend append(val) => new _RqlAppend(this,val);
+
+  _RqlPrepend prepend(val) => new _RqlPrepend(this,val);
+
+  _RqlDifference difference(List ar) => new _RqlDifference(this,ar);
+
+  _RqlSetInsert setInsert(val) => new _RqlSetInsert(this,val);
+
+  _RqlSetUnion setUnion(ar) => new _RqlSetUnion(this,ar);
+
+  _RqlSetIntersection setIntersection(ar) => new _RqlSetIntersection(this,ar);
+
+  _RqlSetDifference setDifference(ar) => new _RqlSetDifference(this,ar);
+
+
+
+  _RqlNth nth(int index) => new _RqlNth(this,index);
+
+  _RqlMatch match(String regex) => new _RqlMatch(this,regex);
+
+  _RqlIsEmpty isEmpty() => new _RqlIsEmpty(this);
+
+  _RqlIndexesOf indexesOf(obj) => new _RqlIndexesOf(this,_funcWrap(obj));
+
+  _RqlSlice slice(int start,[int end]) => new _RqlSlice(this,start,end);
+
+  _RqlSkip skip(int i) => new _RqlSkip(this,i);
+
+  _RqlLimit limit(int i) => new _RqlLimit(this,i);
+
+  _RqlReduce reduce(reductionFunction,[base]) => new _RqlReduce(this,_funcWrap(reductionFunction),base);
+
+  _RqlMap map(mappingFunction) => new _RqlMap(this,_funcWrap(mappingFunction));
+
+  _RqlFilter filter(expr,[options]) => new _RqlFilter(this,_funcWrap(expr),options);
+
+  _RqlConcatMap concatMap(mappingFunction) => new _RqlConcatMap(this,_funcWrap(mappingFunction));
+
+  _RqlOrderBy orderBy(attrs){
+    if(attrs is List)
+      attrs.forEach((ob){
+      if(ob is _RqlAsc || ob is _RqlDesc){
+        //do nothing
+      }
+      else
+        ob = _funcWrap(ob);
+    });
+
+    return new _RqlOrderBy(_listify(attrs));
+  }
+
+  _RqlBetween between(lowerKey,upperKey,[options]) => new _RqlBetween(this,lowerKey,upperKey,options);
+
+  _RqlDistinct distinct() => new _RqlDistinct(this);
+
+  _RqlCount count([filter]){
+    if(filter == null)
+      return new _RqlCount(this);
+    return new _RqlCount(this,_funcWrap(filter));
+  }
+
+  _RqlUnion union(sequence) => new _RqlUnion(this,sequence);
+
+  _RqlInnerJoin innerJoin(otherSequence, predicate) => new _RqlInnerJoin(this,otherSequence,predicate);
+
+  _RqlOuterJoin outerJoin(otherSequence, predicate) => new _RqlOuterJoin(this,otherSequence,predicate);
+
+  _RqlEqJoin eqJoin(leftAttr,otherTable,[options]) => new _RqlEqJoin(this,leftAttr,otherTable,options);
+
+  _RqlZip zip() => new _RqlZip(this);
+
+  _RqlGroupedMapReduce groupedMapReduce(grouping, mapping, reduction, [base])=>
+      new _RqlGroupedMapReduce(this,_funcWrap(grouping),_funcWrap(mapping),_funcWrap(reduction),base);
+
+  _RqlGroupBy groupBy(String attr,reductionObj) => new _RqlGroupBy(this,attr,reductionObj);
+
+  _RqlForEach forEach(write_query) => new _RqlForEach(this,_funcWrap(write_query));
+
+  _RqlInfo info() => new _RqlInfo(this);
+
+  _RqlInsertAt insertAt(index,value) => new _RqlInsertAt(this,index,value);
+
+  _RqlSpliceAt spliceAt(index,ar) => new _RqlSpliceAt(this,index,ar);
+
+  _RqlDeleteAt deleteAt(index,[end]) => new _RqlDeleteAt(this,index,end);
+
+  _RqlChangeAt changeAt(index,value) => new _RqlChangeAt(this,index,value);
+
+  _RqlSample sample(int i) => new _RqlSample(this,i);
+
+  _RqlToISO8601 toISO8601() => new _RqlToISO8601(this);
+
+  _RqlToEpochTime toEpochTime() => new _RqlToEpochTime(this);
+
+  _RqlDuring during(start,end,[options]) => new _RqlDuring(this,start,end,options);
+
+  _RqlDate date() => new _RqlDate(this);
+
+  _RqlTimeOfDay timeOfDay() => new _RqlTimeOfDay(this);
+
+  _RqlTimezone timezone() => new _RqlTimezone(this);
+
+  _RqlYear year() => new _RqlYear(this);
+
+  _RqlMonth month() => new _RqlMonth(this);
+
+  _RqlDay day() => new _RqlDay(this);
+
+  _RqlDayOfWeek dayOfWeek() => new _RqlDayOfWeek(this);
+
+  _RqlDayOfYear dayOfYear() => new _RqlDayOfYear(this);
+
+  _RqlHours hours() => new _RqlHours(this);
+
+  _RqlMinutes minutes() => new _RqlMinutes(this);
+
+  _RqlSeconds seconds() => new _RqlSeconds(this);
+
+  _RqlInTimezone inTimezone(tz) => new _RqlInTimezone(this,tz);
+
+  _RqlUpcase upcase() => new _RqlUpcase(this);
+
+  _RqlDowncase downcase() => new _RqlDowncase(this);
+
+  _listify(item,[needsWrap=false]) {
+    if(needsWrap)
+      _funcWrap(item);
+    List l =[];
+    l.add(this);
+    if(item is Iterable)
+      l.addAll(item);
+    else
+      l.add(item);
+    return l;
+  }
+
+  call(attr){
+    return new _RqlParens(this,attr);
+  }
+
+}
+
+//Database operations
+class _RqlDbCreate extends _RqlTerm {
+  _RqlDbCreate(dbName,[options]) : super(Term_TermType.DB_CREATE,[dbName,options]);
+}
+
+class _RqlDbDrop extends _RqlTerm {
+  _RqlDbDrop(dbName,[options]) : super(Term_TermType.DB_DROP,[dbName],options);
+}
+
+class _RqlDbList extends _RqlTerm {
+  _RqlDbList() : super(Term_TermType.DB_LIST);
+}
+
+
+//Table operations
+class _RqlTableCreate extends _RqlTerm {
+  _RqlTableCreate(tableName,[options]) : super(Term_TermType.TABLE_CREATE,[tableName],options);
+}
+
+class _RqlTableCreateFromDb extends _RqlTerm {
+  _RqlTableCreateFromDb(db,tableName,[options]) : super(Term_TermType.TABLE_CREATE,[db,tableName],options);
+}
+
+class _RqlTableDrop extends _RqlTerm {
+  _RqlTableDrop(tableName,[options]) : super(Term_TermType.TABLE_DROP,[tableName],options);
+}
+
+class _RqlTableDropFromDb extends _RqlTerm {
+  _RqlTableDropFromDb(db, tableName,[options]) : super(Term_TermType.TABLE_DROP,[db,tableName],options);
+}
+
+class _RqlTableList extends _RqlTerm {
+  _RqlTableList([obj]) : super(Term_TermType.TABLE_LIST,[obj]);
+}
+
+class _RqlIndexCreate extends _RqlTerm {
+  _RqlIndexCreate(table,index,[indexFunction,options]) : super(Term_TermType.INDEX_CREATE,[table,index,indexFunction],options);
+}
+
+class _RqlIndexDrop extends _RqlTerm {
+  _RqlIndexDrop(table,index,[options]) : super(Term_TermType.INDEX_DROP,[table,index],options);
+}
+
+
+class _RqlIndexList extends _RqlTerm {
+  _RqlIndexList(table) : super(Term_TermType.INDEX_LIST,[table]);
+}
+
+class _RqlIndexStatus extends _RqlTerm {
+  _RqlIndexStatus(indexList) : super(Term_TermType.INDEX_STATUS,_buildList(indexList));
+}
+
+class _RqlIndexWait extends _RqlTerm {
+  _RqlIndexWait(indexList) : super(Term_TermType.INDEX_WAIT, _buildList(indexList));
+}
+
+//Writing Data
+class _RqlInsert extends _RqlTerm {
+  _RqlInsert(table,records,[options]) : super(Term_TermType.INSERT, [table,new _RqlJson( JSON.encode(records))],options);
+}
+
+
+class _RqlUpdate extends _RqlTerm {
+  _RqlUpdate(table,expression,[options]) : super(Term_TermType.UPDATE,[table,expression],options);
+}
+
+class _RqlReplace extends _RqlTerm {
+  _RqlReplace(table,expression,[options]) : super(Term_TermType.REPLACE,[table,expression],options);
+}
+
+class _RqlDelete extends _RqlTerm {
+  _RqlDelete(selection,[options]) : super(Term_TermType.DELETE,[selection],options);
+}
+
+class _RqlSync extends _RqlTerm {
+  _RqlSync(table) : super(Term_TermType.SYNC, [table]);
+}
+
+//Selecting Data
+class _RqlDatabase extends _RqlTerm {
+   _RqlDatabase(String dbName) : super(Term_TermType.DB,  [dbName]);
+
+   _RqlTableList tableList() => new _RqlTableList(this);
+
+   _RqlTableCreateFromDb tableCreate(String tableName,[Map options]) => new _RqlTableCreateFromDb(this,tableName,options);
+
+   _RqlTableDropFromDb tableDrop(String tableName) => new _RqlTableDropFromDb(this,tableName);
+
+    _RqlTable table(String tableName) => new _RqlTable.fromDb(this,tableName);
+}
+
+class _RqlTable extends _RqlTerm {
+  _RqlTable(String tableName, [options]):super(Term_TermType.TABLE,[tableName], options);
+
+  _RqlTable.fromDb(_RqlDatabase db, String tableName,[options]):super(Term_TermType.TABLE,[db,tableName],options);
+
+  _RqlInsert insert(records,[options]) => new _RqlInsert(this,records,options);
+
+  _RqlGet get(String key) => new _RqlGet(this,key);
+
+  _RqlGetAll getAll(keys,[options]) => new _RqlGetAll(_listify(keys),options);
+
+  _RqlIndexCreate indexCreate(String index,[Function indexFunction]) => new _RqlIndexCreate(this,index,_funcWrap(indexFunction));
+
+  _RqlIndexDrop indexDrop(String index) => new _RqlIndexDrop(this,index);
+
+  _RqlIndexList indexList() => new _RqlIndexList(this);
+
+  _RqlIndexStatus indexStatus([index]) => new _RqlIndexStatus(_listify(index));
+
+  _RqlIndexWait indexWait([index]) =>  new _RqlIndexWait(_listify(index));
+
+  _RqlSync sync() => new _RqlSync(this);
+}
+
+class _RqlGet extends _RqlTerm {
+  _RqlGet(table,key) : super(Term_TermType.GET,[table,key]);
+
+  call(attr){
+    return new _RqlParens(this,attr);
   }
 }
 
-abstract class _ResponseTerm<T,S> extends _RqlTerm {
-  _ResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
-    super(termType, args, options);
+class _RqlGetAll extends _RqlTerm {
+  _RqlGetAll(keys,[options]) : super(Term_TermType.GET_ALL,_buildList(keys),options);
 
-  T buildQueryResponse(S response);
-}
-
-abstract class _CreatedResponseTerm extends _ResponseTerm {
-  _CreatedResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
-    super(termType, args, options);
-
-  CreatedResponse buildQueryResponse(Map response) => new CreatedResponse(response);
-}
-
-abstract class _DroppedResponseTerm extends _ResponseTerm {
-  _DroppedResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
-    super(termType, args, options);
-
-  DroppedResponse buildQueryResponse(Map response) => new DroppedResponse(response);
-}
-
-abstract class _ListResponseTerm extends _ResponseTerm {
-  _ListResponseTerm(termType, [List<_RqlTerm> args, RqlOptions options]) :
-    super(termType, args, options);
-
-  List buildQueryResponse(List response) => response;
-}
-
-///
-/// Management Terms
-///
-class _RqlDBCreate extends _CreatedResponseTerm {
-  _RqlDBCreate(String dbName) : super(Term_TermType.DB_CREATE,  [new _RqlDatumString(dbName)]);
-}
-
-class _RqlDBList extends _ListResponseTerm {
-  _RqlDBList() : super(Term_TermType.DB_LIST);
-}
-
-class _RqlDBDrop extends _DroppedResponseTerm {
-  _RqlDBDrop(String dbName) : super(Term_TermType.DB_DROP,  [new _RqlDatumString(dbName)]);
-}
-
-class RqlDatabase extends _RqlTerm {
-  RqlDatabase(String dbName) : super(Term_TermType.DB,  [new _RqlDatumString(dbName)]);
-}
-
-class _RqlTableCreate extends _CreatedResponseTerm {
-  _RqlTableCreate(String tableName, [TableCreateOptions options]) :
-    super(Term_TermType.TABLE_CREATE,  [new _RqlDatumString(tableName)], options);
-}
-
-class _RqlTableDrop extends _DroppedResponseTerm {
-  _RqlTableDrop(String tableName) :
-    super(Term_TermType.TABLE_DROP,  [new _RqlDatumString(tableName)]);
-}
-
-class _RqlTableList extends _ListResponseTerm {
-  _RqlTableList() : super(Term_TermType.TABLE_LIST);
-}
-
-class RqlTable extends _RqlTerm {
-  RqlTable(String tableName, [TableOptions options]) : super(Term_TermType.TABLE, [new _RqlDatumString(tableName)], options);
-
-  RqlIndexCreate indexCreate(String indexName) {
-    return new RqlIndexCreate(this, indexName);
-  }
-
-  RqlIndexList indexList() {
-    return new RqlIndexList(this);
-  }
-
-  RqlIndexDrop indexDrop(String indexName) {
-    return new RqlIndexDrop(this, indexName);
+  call(attr){
+    return new _RqlParens(this,attr);
   }
 }
 
-class RqlIndexCreate extends _CreatedResponseTerm {
-  RqlIndexCreate(RqlTable table, String indexName) : super(Term_TermType.INDEX_CREATE,  [table, new _RqlDatumString(indexName)]);
+class _RqlBetween extends _RqlTerm {
+  _RqlBetween(table,lowerKey,upperKey,[options]) : super(Term_TermType.BETWEEN,[table,lowerKey,upperKey],options);
 }
 
-class RqlIndexList extends _ListResponseTerm {
-  RqlIndexList(RqlTable table) : super(Term_TermType.INDEX_LIST,  [table]);
+class _RqlFilter extends _RqlTerm {
+  _RqlFilter(selection,predicate,[options]) : super(Term_TermType.FILTER,[selection,predicate],options);
 }
 
-class RqlIndexDrop extends _DroppedResponseTerm {
-  RqlIndexDrop(RqlTable table, String indexName) : super(Term_TermType.INDEX_DROP,  [table, new _RqlDatumString(indexName)]);
+class _RqlAsc extends _RqlTerm {
+  _RqlAsc(attr) : super(Term_TermType.ASC,[attr]);
 }
 
+class _RqlDesc extends _RqlTerm {
+  _RqlDesc(attr) : super(Term_TermType.DESC,[attr]);
+}
+
+//Joins
+class _RqlInnerJoin extends _RqlTerm {
+  _RqlInnerJoin(first,second,predicate) :super(Term_TermType.INNER_JOIN,[first,second,predicate]);
+}
+
+class _RqlOuterJoin extends _RqlTerm {
+  _RqlOuterJoin(first,second,predicate) : super(Term_TermType.OUTER_JOIN,[first,second,predicate]);
+}
+
+class _RqlEqJoin extends _RqlTerm {
+  _RqlEqJoin(seq,leftAttr,otherTable,[options]) : super(Term_TermType.EQ_JOIN,[seq,leftAttr,otherTable],options);
+}
+
+class _RqlZip extends _RqlTerm {
+  _RqlZip(seq) : super(Term_TermType.ZIP,[seq]);
+}
+
+//Transformations
+class _RqlMap extends _RqlTerm {
+  _RqlMap(seq,mappingFunction) : super(Term_TermType.MAP,[seq,mappingFunction]);
+}
+
+class _RqlWithFields extends _RqlTerm {
+  _RqlWithFields(fields) : super(Term_TermType.WITH_FIELDS,[_buildList(fields)]);
+}
+
+class _RqlConcatMap extends _RqlTerm {
+  _RqlConcatMap(seq,mappingFunction) : super(Term_TermType.CONCATMAP,[seq,mappingFunction]);
+}
+
+class _RqlOrderBy extends _RqlTerm {
+  _RqlOrderBy(attrs) : super(Term_TermType.ORDERBY,_buildList(attrs));
+}
+
+class _RqlSkip extends _RqlTerm{
+  _RqlSkip(selection,int num) : super(Term_TermType.SKIP,[selection,num]);
+}
+
+class _RqlLimit extends _RqlTerm{
+  _RqlLimit(selection,int num) : super(Term_TermType.LIMIT,[selection,num]);
+}
+
+class _RqlSlice extends _RqlTerm {
+  _RqlSlice(selection,int start,[int end]) : super(Term_TermType.SLICE,[selection,start,end]);
+}
+
+class _RqlNth extends _RqlTerm {
+  _RqlNth(selection,int index) : super(Term_TermType.NTH,[selection,index]);
+}
+
+class _RqlIndexesOf extends _RqlTerm {
+  _RqlIndexesOf(seq,index) : super(Term_TermType.INDEXES_OF,[seq,index]);
+}
+
+class _RqlIsEmpty extends _RqlTerm {
+  _RqlIsEmpty(selection) : super(Term_TermType.IS_EMPTY,[selection]);
+}
+
+class _RqlUnion extends _RqlTerm {
+  _RqlUnion(first,second) : super(Term_TermType.UNION,[first,second]);
+}
+
+class _RqlSample extends _RqlTerm {
+  _RqlSample(selection,int i) : super(Term_TermType.SAMPLE,[selection,i]);
+}
+
+//Aggregation
+class _RqlReduce extends _RqlTerm {
+  _RqlReduce(seq,reductionFunction,[base]) : super(Term_TermType.REDUCE,[seq,reductionFunction],{"base":base});
+}
+
+class _RqlCount extends _RqlTerm {
+  _RqlCount([seq,filter]) : super(Term_TermType.COUNT,[seq,filter]);
+}
+
+class _RqlDistinct extends _RqlTerm {
+  _RqlDistinct(sequence) : super(Term_TermType.DISTINCT,[sequence]);
+}
+
+class _RqlGroupedMapReduce extends _RqlTerm {
+  _RqlGroupedMapReduce(seq,grouping,mapping,reduction,base) : super(Term_TermType.GROUPED_MAP_REDUCE,[seq,grouping,mapping,reduction,base]);
+}
+
+class _RqlGroupBy extends _RqlTerm {
+  _RqlGroupBy(groupable,selector,reductionObject) : super(Term_TermType.GROUPBY,[groupable, selector,reductionObject]);
+}
+
+class _RqlContains extends _RqlTerm {
+  _RqlContains(items) : super(Term_TermType.CONTAINS,[_buildList(items)]);
+}
+
+//Aggregators
+class _RqlSum extends _RqlTerm {
+  _RqlSum(attr) : super(Term_TermType.MAKE_OBJ,[null],{"SUM":attr});
+}
+
+class _RqlAvg extends _RqlTerm {
+  _RqlAvg(attr) : super(Term_TermType.MAKE_OBJ,[null],{"AVG":attr});
+}
+
+//Document Manipulation
+class _RqlPluck extends _RqlTerm {
+  _RqlPluck(items) : super(Term_TermType.PLUCK,_buildList(items));
+}
+
+class _RqlWithout extends _RqlTerm {
+  _RqlWithout(items) : super(Term_TermType.WITHOUT,_buildList(items));
+}
+
+class _RqlMerge extends _RqlTerm {
+  _RqlMerge(sequence,obj) : super(Term_TermType.MERGE,[sequence,obj]);
+}
+
+class _RqlAppend extends _RqlTerm {
+  _RqlAppend(ar,val) : super(Term_TermType.APPEND,[ar,val]);
+}
+
+class _RqlPrepend extends _RqlTerm {
+  _RqlPrepend(ar,val) : super(Term_TermType.PREPEND,[ar,val]);
+}
+
+class _RqlDifference extends _RqlTerm {
+  _RqlDifference(diffable,ar) : super(Term_TermType.DIFFERENCE,[diffable,ar]);
+}
+
+class _RqlSetInsert extends _RqlTerm {
+  _RqlSetInsert(ar,val) : super(Term_TermType.SET_INSERT,[ar,val]);
+}
+
+class _RqlSetUnion extends _RqlTerm {
+  _RqlSetUnion(un,ar) : super(Term_TermType.SET_UNION,[un,ar]);
+}
+
+class _RqlSetIntersection extends _RqlTerm {
+  _RqlSetIntersection(inter,ar) : super(Term_TermType.SET_INTERSECTION,[inter,ar]);
+}
+
+class _RqlSetDifference extends _RqlTerm {
+  _RqlSetDifference(diff,ar) : super(Term_TermType.SET_DIFFERENCE,[diff,ar]);
+}
+
+class _RqlParens extends _RqlTerm {
+  _RqlParens(obj,attr) : super(Term_TermType.GET_FIELD,[obj,attr]);
+
+}
+
+class _RqlHasFields extends _RqlTerm {
+  _RqlHasFields(obj,[items]) : super(Term_TermType.HAS_FIELDS,[obj,items]);
+}
+
+class _RqlInsertAt extends _RqlTerm {
+  _RqlInsertAt(ar,index,value) : super(Term_TermType.INSERT_AT,[ar,index,value]);
+}
+
+class _RqlSpliceAt extends _RqlTerm {
+  _RqlSpliceAt(ar,index,val) : super(Term_TermType.SPLICE_AT,[ar,index,val]);
+}
+
+class _RqlDeleteAt extends _RqlTerm {
+  _RqlDeleteAt(ar,start,end) : super(Term_TermType.DELETE_AT,[ar,start,end]);
+}
+
+class _RqlChangeAt extends _RqlTerm {
+  _RqlChangeAt(ar,index,value) : super(Term_TermType.CHANGE_AT,[ar,index,value]);
+}
+
+class _RqlKeys extends _RqlTerm {
+  _RqlKeys(obj) : super(Term_TermType.KEYS,[obj]);
+}
+
+//String Manipulation
+class _RqlMatch extends _RqlTerm {
+  _RqlMatch(obj,regex) : super(Term_TermType.MATCH,[obj,regex]);
+}
+
+//Math and Logic
+class _RqlAdd extends _RqlTerm {
+  _RqlAdd(addable,obj) : super(Term_TermType.ADD,[addable,obj]);
+}
+
+class _RqlSub extends _RqlTerm {
+  _RqlSub(subbable,obj) : super(Term_TermType.SUB,[subbable,obj]);
+}
+
+class _RqlMul extends _RqlTerm {
+  _RqlMul(mulable,obj) : super(Term_TermType.MUL,[mulable, obj]);
+}
+
+class _RqlDiv extends _RqlTerm {
+  _RqlDiv(divisible,obj) : super(Term_TermType.DIV,[divisible, obj]);
+}
+
+class _RqlMod extends _RqlTerm {
+  _RqlMod(modable,obj) : super(Term_TermType.MOD,[modable,obj]);
+}
+
+class _RqlAnd extends _RqlTerm {
+  _RqlAnd(andable,obj) : super(Term_TermType.ALL,[andable,obj]);
+}
+
+class _RqlOr extends _RqlTerm {
+  _RqlOr(orable,obj) : super(Term_TermType.ANY,[orable,obj]);
+}
+
+class _RqlEq extends _RqlTerm {
+  _RqlEq(comparable,numb) : super(Term_TermType.EQ,[comparable,numb]);
+}
+
+class _RqlNe extends _RqlTerm {
+  _RqlNe(comparable,numb) : super(Term_TermType.NE,[comparable,numb]);
+}
+
+class _RqlGt extends _RqlTerm {
+  _RqlGt(comparable,obj) : super(Term_TermType.GT,[comparable,obj]);
+}
+
+class _RqlGe extends _RqlTerm {
+  _RqlGe(comparable,obj) : super(Term_TermType.GE,[comparable,obj]);
+}
+
+class _RqlLt extends _RqlTerm {
+  _RqlLt(comparable,obj) : super(Term_TermType.LT,[comparable,obj]);
+}
+
+class _RqlLe extends _RqlTerm {
+  _RqlLe(comparable,obj) : super(Term_TermType.LE,[comparable,obj]);
+}
+
+class _RqlNot extends _RqlTerm {
+  _RqlNot(notable) : super(Term_TermType.NOT,[notable]);
+}
+
+//Dates and Times
+class _RqlNow extends _RqlTerm {
+  _RqlNow() : super(Term_TermType.NOW);
+}
+
+class _RqlTime extends _RqlTerm {
+  _RqlTime(year, month, day, timezone, [hour, minute, second]) :
+    super(Term_TermType.TIME,[year,month,day,hour,minute,second,timezone]);
+
+  _RqlTime.nativeTime(DateTime nativeTime):super(Term_TermType.TIME, [nativeTime]);
+}
+
+class _RqlEpochTime extends _RqlTerm {
+  _RqlEpochTime(epochTime) : super(Term_TermType.EPOCH_TIME,[epochTime]);
+}
+
+class _RqlISO8601 extends _RqlTerm {
+  _RqlISO8601(stringTime,[default_time_zone="Z"]) : super(Term_TermType.ISO8601,[stringTime],{"default_timezone":default_time_zone});
+}
+
+class _RqlInTimezone extends _RqlTerm {
+  _RqlInTimezone(zoneable,tz) : super(Term_TermType.IN_TIMEZONE,[zoneable,tz]);
+}
+
+class _RqlTimezone extends _RqlTerm {
+  _RqlTimezone(zoneable) : super(Term_TermType.TIMEZONE,[zoneable]);
+}
+
+class _RqlDuring extends _RqlTerm {
+  _RqlDuring(obj,start,end,[options]) : super(Term_TermType.DURING,[obj,start,end],options);
+}
+
+class _RqlDate extends _RqlTerm {
+  _RqlDate(obj) : super(Term_TermType.DATE,[obj]);
+}
+
+class _RqlTimeOfDay extends _RqlTerm {
+  _RqlTimeOfDay(obj) : super(Term_TermType.TIME_OF_DAY,[obj]);
+}
+
+class _RqlYear extends _RqlTerm {
+  _RqlYear(obj) : super(Term_TermType.YEAR,[obj]);
+}
+
+class _RqlMonth extends _RqlTerm {
+  _RqlMonth(obj) : super(Term_TermType.MONTH,[obj]);
+}
+
+class _RqlDay extends _RqlTerm {
+  _RqlDay(obj) : super(Term_TermType.DAY,[obj]);
+}
+
+class _RqlDayOfWeek extends _RqlTerm {
+  _RqlDayOfWeek(obj) : super(Term_TermType.DAY_OF_WEEK,[obj]);
+}
+
+class _RqlDayOfYear extends _RqlTerm {
+  _RqlDayOfYear(obj) : super(Term_TermType.DAY_OF_YEAR,[obj]);
+}
+
+class _RqlHours extends _RqlTerm {
+  _RqlHours(obj) : super(Term_TermType.HOURS,[obj]);
+}
+
+class _RqlMinutes extends _RqlTerm {
+  _RqlMinutes(obj) : super(Term_TermType.MINUTES,[obj]);
+}
+
+class _RqlSeconds extends _RqlTerm {
+  _RqlSeconds(obj) : super(Term_TermType.SECONDS,[obj]);
+}
+
+class _RqlToISO8601 extends _RqlTerm {
+  _RqlToISO8601(obj) : super(Term_TermType.TO_ISO8601,[obj]);
+}
+
+class _RqlToEpochTime extends _RqlTerm {
+  _RqlToEpochTime(obj) : super(Term_TermType.TO_EPOCH_TIME,[obj]);
+}
+
+//Control Structures
+class _RqlDo extends _RqlTerm {
+  _RqlDo(obj, args,expression) : super(Term_TermType.FUNCALL,[obj, args, expression]);
+}
+
+class _RqlBranch extends _RqlTerm {
+  _RqlBranch(predicate, true_branch, false_branch) : super(Term_TermType.BRANCH,[predicate,true_branch,false_branch]);
+}
+
+class _RqlForEach extends _RqlTerm {
+  _RqlForEach(obj,write_query) : super(Term_TermType.FOREACH,[obj,write_query]);
+}
+
+class _RqlError extends _RqlTerm {
+  _RqlError(err, [options]) : super(Term_TermType.ERROR,[err],options);
+}
+
+class _RqlDefault extends _RqlTerm {
+  _RqlDefault(obj,value) : super(Term_TermType.DEFAULT,[obj,value]);
+}
+
+class _RqlObject extends _RqlTerm {
+  _RqlObject(arg1,arg2) : super(Term_TermType.OBJECT,[arg1,arg2]);
+}
+
+class _RqlUpcase extends _RqlTerm {
+  _RqlUpcase(str) : super(Term_TermType.UPCASE,[str]);
+}
+
+class _RqlDowncase extends _RqlTerm {
+  _RqlDowncase(str) : super(Term_TermType.DOWNCASE,[str]);
+}
+
+_RqlTerm expr(val)
+{
+  if(val is _RqlTerm)
+    return val;
+  else if(val is DateTime)
+    return new _RqlISO8601(val.toString(),_fmtTz(val.timeZoneOffset.toString()));
+  else if(val is List) {
+    List copy = [];
+    val.forEach((element)=>copy.add(expr(element)));
+    return new _RqlMakeArray(copy);
+  }
+  else if(val is Map) {
+    Map obj = {};
+    val.forEach((k,v){
+      obj[k] = expr(v);
+    });
+    return new _RqlMakeObj(obj);
+  }
+  else if(val is Function)
+    return new _RqlFunction(val);
+  else if(val is bool)
+    return new _RqlDatumBool(val);
+  else if(val is num)
+    return new _RqlDatumNum(val);
+  else if(val is String)
+    return new _RqlDatumString(val);
+  else {
+    return val;
+  }
+
+}
+
+class _RqlJs extends _RqlTerm {
+  _RqlJs(String js_str, [options]) : super(Term_TermType.JAVASCRIPT, [js_str],options);
+}
+
+class _RqlCoerceTo extends _RqlTerm {
+  _RqlCoerceTo(obj,String type) : super(Term_TermType.COERCE_TO,[obj,type]);
+}
+
+class _RqlTypeOf extends _RqlTerm {
+  _RqlTypeOf(obj) : super(Term_TermType.TYPEOF,[obj]);
+}
+
+class _RqlInfo extends _RqlTerm {
+  _RqlInfo(knowable) : super(Term_TermType.INFO,[knowable]);
+}
+
+class _RqlJson extends _RqlTerm {
+  _RqlJson(String jsonString,[options]) : super(Term_TermType.JSON, [jsonString],options);
+}
+
+class _RqlImplicitVar extends _RqlTerm {
+_RqlImplicitVar():super(Term_TermType.IMPLICIT_VAR);
+
+call(arg) => new _RqlParens(this,arg);
+
+}
+
+
+//Utils
+class _RqlMakeObj extends _RqlTerm {
+  _RqlMakeObj(obj) : super(Term_TermType.MAKE_OBJ,[],obj);
+}
+class _RqlMakeArray extends _RqlTerm {
+  _RqlMakeArray(attrs) : super(Term_TermType.MAKE_ARRAY,attrs);
+
+  _RqlDo reqlDo(arg,expression) => new _RqlDo(this, arg,_funcWrap(expression));
+}
+
+class _RqlVar extends _RqlTerm {
+  _RqlVar(variable) : super(Term_TermType.VAR,[variable]);
+
+  call(arg) => new _RqlParens(this,arg);
+}
+
+class _RqlFunction extends _RqlTerm {
+  var fun;
+  static var nextId = 1;
+  _RqlFunction(fun) : super(Term_TermType.FUNC){
+    MethodMirror methodMirror = reflect(fun).function;
+    var x = methodMirror.parameters.length;
+    List vrs =[];
+    List vrids = [];
+
+    for(var i=0;i<x;i++){
+      vrs.add(new _RqlVar(_RqlFunction.nextId));
+      vrids.add(_RqlFunction.nextId);
+      _RqlFunction.nextId++;
+    }
+
+    this._args =  [new _RqlMakeArray(vrids),expr(Function.apply(fun, vrs))];
+
+  }
+
+}
+
+String _fmtTz(tz){
+  StringBuffer sb = new StringBuffer();
+  sb.write(tz[0]);
+  if(tz[2] == ":")
+    sb.write("0");
+  sb.write(tz.substring(1,5));
+  return sb.toString();
+}
+
+_buildList(val) {
+  List copy = [];
+  val.forEach((element)=>copy.add(element));
+  return copy;
+}
+
+_funcWrap(val){
+  val = expr(val);
+  // Scan for IMPLICIT_VAR or JS
+  List argList = [];
+  List optList = [];
+  ivar_scan(node){
+    if(node is _RqlTerm == false)
+      return false;
+    if(node is _RqlImplicitVar)
+      return true;
+    node._args.forEach((arg){
+      argList.add(ivar_scan(arg));
+    });
+    if(argList.any((bool i) => i == true))
+      return true;
+    node._options.forEach((k,arg){
+      optList.add(ivar_scan(arg));
+    });
+    if(optList.any((bool i) => i == true))
+      return true;
+    return false;
+  }
+
+  if(ivar_scan(val))
+    return new _RqlFunction((x)=>val);
+  return val;
+}
+
+
+_reql_type_time_to_datetime(obj){
+  //TODO convert rql time to native DateTime
+}

@@ -3,7 +3,9 @@ part of rethinkdb;
 class RqlException implements Exception {
   String message;
   Exception innerException;
-  RqlException(this.message, [this.innerException]);
+  RqlException(this.message, [this.innerException]){
+    print(message);
+  }
 }
 
 class RqlConnectionException extends RqlException {

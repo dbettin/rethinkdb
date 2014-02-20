@@ -1,10 +1,9 @@
 ///
 //  Generated code. Do not modify.
 ///
-library Ql2.pb;
+library ql2;
 
-import 'dart:typed_data';
-
+import 'package:fixnum/fixnum.dart';
 import 'package:protobuf/protobuf.dart';
 
 class VersionDummy_Version extends ProtobufEnum {
@@ -38,11 +37,13 @@ class Query_QueryType extends ProtobufEnum {
   static const Query_QueryType START = const Query_QueryType._(1, 'START');
   static const Query_QueryType CONTINUE = const Query_QueryType._(2, 'CONTINUE');
   static const Query_QueryType STOP = const Query_QueryType._(3, 'STOP');
+  static const Query_QueryType NOREPLY_WAIT = const Query_QueryType._(4, 'NOREPLY_WAIT');
 
   static const List<Query_QueryType> values = const <Query_QueryType> [
     START,
     CONTINUE,
     STOP,
+    NOREPLY_WAIT,
   ];
 
   static final Map<int, Query_QueryType> _byValue = ProtobufEnum.initByValue(values);
@@ -80,6 +81,7 @@ class Query extends GeneratedMessage {
     ..a(2, 'query', GeneratedMessage.OM, () => new Term(), () => new Term())
     ..a(3, 'token', GeneratedMessage.O6, () => makeLongInt(0))
     ..a(4, 'oBSOLETENoreply', GeneratedMessage.OB)
+    ..a(5, 'acceptsRJson', GeneratedMessage.OB)
     ..m(6, 'globalOptargs', () => new Query_AssocPair(), () => new PbList<Query_AssocPair>())
   ;
 
@@ -99,8 +101,8 @@ class Query extends GeneratedMessage {
   bool hasQuery() => hasField(2);
   void clearQuery() => clearField(2);
 
-  ByteData get token => getField(3);
-  void set token(ByteData v) { setField(3, v); }
+  Int64 get token => getField(3);
+  void set token(Int64 v) { setField(3, v); }
   bool hasToken() => hasField(3);
   void clearToken() => clearField(3);
 
@@ -108,6 +110,11 @@ class Query extends GeneratedMessage {
   void set oBSOLETENoreply(bool v) { setField(4, v); }
   bool hasOBSOLETENoreply() => hasField(4);
   void clearOBSOLETENoreply() => clearField(4);
+
+  bool get acceptsRJson => getField(5);
+  void set acceptsRJson(bool v) { setField(5, v); }
+  bool hasAcceptsRJson() => hasField(5);
+  void clearAcceptsRJson() => clearField(5);
 
   List<Query_AssocPair> get globalOptargs => getField(6);
 }
@@ -146,8 +153,8 @@ class Frame extends GeneratedMessage {
   bool hasType() => hasField(1);
   void clearType() => clearField(1);
 
-  ByteData get pos => getField(2);
-  void set pos(ByteData v) { setField(2, v); }
+  Int64 get pos => getField(2);
+  void set pos(Int64 v) { setField(2, v); }
   bool hasPos() => hasField(2);
   void clearPos() => clearField(2);
 
@@ -176,6 +183,7 @@ class Response_ResponseType extends ProtobufEnum {
   static const Response_ResponseType SUCCESS_ATOM = const Response_ResponseType._(1, 'SUCCESS_ATOM');
   static const Response_ResponseType SUCCESS_SEQUENCE = const Response_ResponseType._(2, 'SUCCESS_SEQUENCE');
   static const Response_ResponseType SUCCESS_PARTIAL = const Response_ResponseType._(3, 'SUCCESS_PARTIAL');
+  static const Response_ResponseType WAIT_COMPLETE = const Response_ResponseType._(4, 'WAIT_COMPLETE');
   static const Response_ResponseType CLIENT_ERROR = const Response_ResponseType._(16, 'CLIENT_ERROR');
   static const Response_ResponseType COMPILE_ERROR = const Response_ResponseType._(17, 'COMPILE_ERROR');
   static const Response_ResponseType RUNTIME_ERROR = const Response_ResponseType._(18, 'RUNTIME_ERROR');
@@ -184,6 +192,7 @@ class Response_ResponseType extends ProtobufEnum {
     SUCCESS_ATOM,
     SUCCESS_SEQUENCE,
     SUCCESS_PARTIAL,
+    WAIT_COMPLETE,
     CLIENT_ERROR,
     COMPILE_ERROR,
     RUNTIME_ERROR,
@@ -201,6 +210,7 @@ class Response extends GeneratedMessage {
     ..a(2, 'token', GeneratedMessage.O6, () => makeLongInt(0))
     ..m(3, 'response', () => new Datum(), () => new PbList<Datum>())
     ..a(4, 'backtrace', GeneratedMessage.OM, () => new Backtrace(), () => new Backtrace())
+    ..a(5, 'profile', GeneratedMessage.OM, () => new Datum(), () => new Datum())
   ;
 
   Response() : super();
@@ -214,8 +224,8 @@ class Response extends GeneratedMessage {
   bool hasType() => hasField(1);
   void clearType() => clearField(1);
 
-  ByteData get token => getField(2);
-  void set token(ByteData v) { setField(2, v); }
+  Int64 get token => getField(2);
+  void set token(Int64 v) { setField(2, v); }
   bool hasToken() => hasField(2);
   void clearToken() => clearField(2);
 
@@ -225,6 +235,11 @@ class Response extends GeneratedMessage {
   void set backtrace(Backtrace v) { setField(4, v); }
   bool hasBacktrace() => hasField(4);
   void clearBacktrace() => clearField(4);
+
+  Datum get profile => getField(5);
+  void set profile(Datum v) { setField(5, v); }
+  bool hasProfile() => hasField(5);
+  void clearProfile() => clearField(5);
 }
 
 class Datum_DatumType extends ProtobufEnum {
@@ -234,6 +249,7 @@ class Datum_DatumType extends ProtobufEnum {
   static const Datum_DatumType R_STR = const Datum_DatumType._(4, 'R_STR');
   static const Datum_DatumType R_ARRAY = const Datum_DatumType._(5, 'R_ARRAY');
   static const Datum_DatumType R_OBJECT = const Datum_DatumType._(6, 'R_OBJECT');
+  static const Datum_DatumType R_JSON = const Datum_DatumType._(7, 'R_JSON');
 
   static const List<Datum_DatumType> values = const <Datum_DatumType> [
     R_NULL,
@@ -242,6 +258,7 @@ class Datum_DatumType extends ProtobufEnum {
     R_STR,
     R_ARRAY,
     R_OBJECT,
+    R_JSON,
   ];
 
   static final Map<int, Datum_DatumType> _byValue = ProtobufEnum.initByValue(values);
@@ -353,6 +370,7 @@ class Term_TermType extends ProtobufEnum {
   static const Term_TermType CONTAINS = const Term_TermType._(93, 'CONTAINS');
   static const Term_TermType GET_FIELD = const Term_TermType._(31, 'GET_FIELD');
   static const Term_TermType KEYS = const Term_TermType._(94, 'KEYS');
+  static const Term_TermType OBJECT = const Term_TermType._(143, 'OBJECT');
   static const Term_TermType HAS_FIELDS = const Term_TermType._(32, 'HAS_FIELDS');
   static const Term_TermType WITH_FIELDS = const Term_TermType._(96, 'WITH_FIELDS');
   static const Term_TermType PLUCK = const Term_TermType._(33, 'PLUCK');
@@ -391,9 +409,12 @@ class Term_TermType extends ProtobufEnum {
   static const Term_TermType TABLE_CREATE = const Term_TermType._(60, 'TABLE_CREATE');
   static const Term_TermType TABLE_DROP = const Term_TermType._(61, 'TABLE_DROP');
   static const Term_TermType TABLE_LIST = const Term_TermType._(62, 'TABLE_LIST');
+  static const Term_TermType SYNC = const Term_TermType._(138, 'SYNC');
   static const Term_TermType INDEX_CREATE = const Term_TermType._(75, 'INDEX_CREATE');
   static const Term_TermType INDEX_DROP = const Term_TermType._(76, 'INDEX_DROP');
   static const Term_TermType INDEX_LIST = const Term_TermType._(77, 'INDEX_LIST');
+  static const Term_TermType INDEX_STATUS = const Term_TermType._(139, 'INDEX_STATUS');
+  static const Term_TermType INDEX_WAIT = const Term_TermType._(140, 'INDEX_WAIT');
   static const Term_TermType FUNCALL = const Term_TermType._(64, 'FUNCALL');
   static const Term_TermType BRANCH = const Term_TermType._(65, 'BRANCH');
   static const Term_TermType ANY = const Term_TermType._(66, 'ANY');
@@ -404,9 +425,50 @@ class Term_TermType extends ProtobufEnum {
   static const Term_TermType DESC = const Term_TermType._(74, 'DESC');
   static const Term_TermType INFO = const Term_TermType._(79, 'INFO');
   static const Term_TermType MATCH = const Term_TermType._(97, 'MATCH');
+  static const Term_TermType UPCASE = const Term_TermType._(141, 'UPCASE');
+  static const Term_TermType DOWNCASE = const Term_TermType._(142, 'DOWNCASE');
   static const Term_TermType SAMPLE = const Term_TermType._(81, 'SAMPLE');
   static const Term_TermType DEFAULT = const Term_TermType._(92, 'DEFAULT');
   static const Term_TermType JSON = const Term_TermType._(98, 'JSON');
+  static const Term_TermType ISO8601 = const Term_TermType._(99, 'ISO8601');
+  static const Term_TermType TO_ISO8601 = const Term_TermType._(100, 'TO_ISO8601');
+  static const Term_TermType EPOCH_TIME = const Term_TermType._(101, 'EPOCH_TIME');
+  static const Term_TermType TO_EPOCH_TIME = const Term_TermType._(102, 'TO_EPOCH_TIME');
+  static const Term_TermType NOW = const Term_TermType._(103, 'NOW');
+  static const Term_TermType IN_TIMEZONE = const Term_TermType._(104, 'IN_TIMEZONE');
+  static const Term_TermType DURING = const Term_TermType._(105, 'DURING');
+  static const Term_TermType DATE = const Term_TermType._(106, 'DATE');
+  static const Term_TermType TIME_OF_DAY = const Term_TermType._(126, 'TIME_OF_DAY');
+  static const Term_TermType TIMEZONE = const Term_TermType._(127, 'TIMEZONE');
+  static const Term_TermType YEAR = const Term_TermType._(128, 'YEAR');
+  static const Term_TermType MONTH = const Term_TermType._(129, 'MONTH');
+  static const Term_TermType DAY = const Term_TermType._(130, 'DAY');
+  static const Term_TermType DAY_OF_WEEK = const Term_TermType._(131, 'DAY_OF_WEEK');
+  static const Term_TermType DAY_OF_YEAR = const Term_TermType._(132, 'DAY_OF_YEAR');
+  static const Term_TermType HOURS = const Term_TermType._(133, 'HOURS');
+  static const Term_TermType MINUTES = const Term_TermType._(134, 'MINUTES');
+  static const Term_TermType SECONDS = const Term_TermType._(135, 'SECONDS');
+  static const Term_TermType TIME = const Term_TermType._(136, 'TIME');
+  static const Term_TermType MONDAY = const Term_TermType._(107, 'MONDAY');
+  static const Term_TermType TUESDAY = const Term_TermType._(108, 'TUESDAY');
+  static const Term_TermType WEDNESDAY = const Term_TermType._(109, 'WEDNESDAY');
+  static const Term_TermType THURSDAY = const Term_TermType._(110, 'THURSDAY');
+  static const Term_TermType FRIDAY = const Term_TermType._(111, 'FRIDAY');
+  static const Term_TermType SATURDAY = const Term_TermType._(112, 'SATURDAY');
+  static const Term_TermType SUNDAY = const Term_TermType._(113, 'SUNDAY');
+  static const Term_TermType JANUARY = const Term_TermType._(114, 'JANUARY');
+  static const Term_TermType FEBRUARY = const Term_TermType._(115, 'FEBRUARY');
+  static const Term_TermType MARCH = const Term_TermType._(116, 'MARCH');
+  static const Term_TermType APRIL = const Term_TermType._(117, 'APRIL');
+  static const Term_TermType MAY = const Term_TermType._(118, 'MAY');
+  static const Term_TermType JUNE = const Term_TermType._(119, 'JUNE');
+  static const Term_TermType JULY = const Term_TermType._(120, 'JULY');
+  static const Term_TermType AUGUST = const Term_TermType._(121, 'AUGUST');
+  static const Term_TermType SEPTEMBER = const Term_TermType._(122, 'SEPTEMBER');
+  static const Term_TermType OCTOBER = const Term_TermType._(123, 'OCTOBER');
+  static const Term_TermType NOVEMBER = const Term_TermType._(124, 'NOVEMBER');
+  static const Term_TermType DECEMBER = const Term_TermType._(125, 'DECEMBER');
+  static const Term_TermType LITERAL = const Term_TermType._(137, 'LITERAL');
 
   static const List<Term_TermType> values = const <Term_TermType> [
     DATUM,
@@ -446,6 +508,7 @@ class Term_TermType extends ProtobufEnum {
     CONTAINS,
     GET_FIELD,
     KEYS,
+    OBJECT,
     HAS_FIELDS,
     WITH_FIELDS,
     PLUCK,
@@ -484,9 +547,12 @@ class Term_TermType extends ProtobufEnum {
     TABLE_CREATE,
     TABLE_DROP,
     TABLE_LIST,
+    SYNC,
     INDEX_CREATE,
     INDEX_DROP,
     INDEX_LIST,
+    INDEX_STATUS,
+    INDEX_WAIT,
     FUNCALL,
     BRANCH,
     ANY,
@@ -497,9 +563,50 @@ class Term_TermType extends ProtobufEnum {
     DESC,
     INFO,
     MATCH,
+    UPCASE,
+    DOWNCASE,
     SAMPLE,
     DEFAULT,
     JSON,
+    ISO8601,
+    TO_ISO8601,
+    EPOCH_TIME,
+    TO_EPOCH_TIME,
+    NOW,
+    IN_TIMEZONE,
+    DURING,
+    DATE,
+    TIME_OF_DAY,
+    TIMEZONE,
+    YEAR,
+    MONTH,
+    DAY,
+    DAY_OF_WEEK,
+    DAY_OF_YEAR,
+    HOURS,
+    MINUTES,
+    SECONDS,
+    TIME,
+    MONDAY,
+    TUESDAY,
+    WEDNESDAY,
+    THURSDAY,
+    FRIDAY,
+    SATURDAY,
+    SUNDAY,
+    JANUARY,
+    FEBRUARY,
+    MARCH,
+    APRIL,
+    MAY,
+    JUNE,
+    JULY,
+    AUGUST,
+    SEPTEMBER,
+    OCTOBER,
+    NOVEMBER,
+    DECEMBER,
+    LITERAL,
   ];
 
   static final Map<int, Term_TermType> _byValue = ProtobufEnum.initByValue(values);

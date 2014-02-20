@@ -21,7 +21,7 @@ _buildDatumResponseValue(Datum datum) {
 abstract class _RqlDatum<T> extends _RqlTerm {
   _RqlDatum() : super(Term_TermType.DATUM);
 
-  Term _buildProtoTerm() {
+  Term build() {
     var term = new Term();
     term.type = _termType;
     term.datum = _buildProtoDatum();
@@ -29,8 +29,7 @@ abstract class _RqlDatum<T> extends _RqlTerm {
   }
 
   T value;
-  Datum _buildProtoDatum();
-
+  _buildProtoDatum();
 }
 
 class _RqlDatumString extends _RqlDatum {
@@ -39,7 +38,7 @@ class _RqlDatumString extends _RqlDatum {
 
   _RqlDatumString(this.value);
 
-  Datum _buildProtoDatum() {
+  _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_STR;
     datum.rStr = value;
@@ -49,13 +48,31 @@ class _RqlDatumString extends _RqlDatum {
 }
 
 class _RqlDatumObject extends _RqlDatum {
-  Map<String, dynamic> value = {};
+  Map value = {};
 
-  _RqlDatumObject(List<Datum_AssocPair> assocPair) {
-    assocPair.forEach((pair) => value[pair.key] = _buildDatumResponseValue(pair.val));
+  _RqlDatumObject(val) {
+    if(val is Map)
+      this.value = val;
+    else
+    {
+      val.forEach((element){
+        value[element.key] = _buildDatumResponseValue(element.val);
+      });
+    }
   }
-  Datum _buildProtoDatum() {
-    // TODO implement this method
+
+  _buildProtoDatum() {
+    var datum = new Datum();
+    datum.type = Datum_DatumType.R_OBJECT;
+    value.forEach((k,v){
+      Datum_AssocPair d = new Datum_AssocPair();
+      d.key = k;
+      if(v is _RqlDatum)
+        d.val = v._buildProtoDatum();
+      else
+        d.val = v;
+      datum.rObject.add(d);});
+    return datum;
   }
 
 }
@@ -66,7 +83,7 @@ class _RqlDatumBool extends _RqlDatum {
 
   _RqlDatumBool(this.value);
 
-  Datum _buildProtoDatum() {
+  _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_BOOL;
     datum.rBool = value;
@@ -80,7 +97,7 @@ class _RqlDatumNum extends _RqlDatum {
 
   _RqlDatumNum(this.value);
 
-  Datum _buildProtoDatum() {
+  _buildProtoDatum() {
     var datum = new Datum();
     datum.type = Datum_DatumType.R_NUM;
     datum.rNum = value.toDouble();
@@ -93,10 +110,18 @@ class _RqlDatumArray extends _RqlDatum {
   List value = [];
 
   _RqlDatumArray(data) {
-    data.forEach((datum) => value.add(_buildDatumResponseValue(datum)));
+    data.forEach((v){
+        if(v is Datum)
+          value.add(_buildDatumResponseValue(v));
+        else
+          value.add(v);
+    });
   }
 
-  Datum _buildProtoDatum() {
-    // TODO implement this method
+  _buildProtoDatum() {
+    var datum = new Datum();
+    datum.type = Datum_DatumType.R_ARRAY;
+    value.forEach((element)=>datum.rArray.add(element._buildProtoDatum()));
+    return datum;
   }
 }
