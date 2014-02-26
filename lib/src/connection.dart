@@ -161,10 +161,33 @@ class _RqlConnection {
     }
   }
 
+  int responseLength = 0;
+  BytesBuilder responseBuilder = new BytesBuilder();
+
   void _handleProtoResponse(Uint8List response) {
-   Response protoResponse = new Response.fromBuffer(response.sublist(4));
-   _RqlQuery correlatedQuery = _replyQueries.remove(protoResponse.token);
-   correlatedQuery._handleProtoResponse(protoResponse);
+   
+    if (responseLength == 0) { // Fresh response is coming in
+      
+      Uint8List firstFourBytes = response.sublist(0, 4);
+      responseLength = _toInt(firstFourBytes);
+      responseBuilder.add(response.sublist(4));
+      
+    } else if (responseBuilder.length < responseLength) { 
+      responseBuilder.add(response);
+    }
+   
+    // Got the last piece of the wire data, it's safe to put it together.
+    if (responseBuilder.length >= responseLength) {
+      Uint8List completeResponse = responseBuilder.takeBytes();
+      Response protoResponse = new Response.fromBuffer(completeResponse);
+ 
+      _RqlQuery correlatedQuery = _replyQueries.remove(protoResponse.token);
+      correlatedQuery._handleProtoResponse(protoResponse);
+      
+      responseBuilder.clear();
+      responseLength = 0;
+      
+    }
   }
 
   void _handleAuthResponse(Uint8List response) {
@@ -189,6 +212,15 @@ class _RqlConnection {
     this._log.fine('Query $query');
     this._sendQueue.addLast(query);
     return this._sendBuffer()._query.future;
+  }
+  
+  int _toInt(Uint8List bytes) {
+    if (bytes.length != 4) {
+      throw new ArgumentError('Byte array has to be 4 items long.');
+    }
+    ByteData byteData = new ByteData.view(bytes.buffer, 0, 4);
+    int result = byteData.getInt32(0, Endianness.LITTLE_ENDIAN);
+    return result;
   }
 
   // TODO: look at dart:typed_data as a replacement once it is fully baked
