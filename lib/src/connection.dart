@@ -27,6 +27,9 @@ class _RqlConnection {
   final _sendQueue = new Queue<_RqlQuery>();
   bool _closing = false;
 
+  int _responseLength = 0;
+  BytesBuilder _responseBuilder = new BytesBuilder();
+
   Map _outstandingCallbacks = {};
   StreamSubscription<List<int>> _socketSubscription;
 
@@ -97,7 +100,7 @@ class _RqlConnection {
   /**
    *  ensures that previous queries with noreply flag have been processed by the server.
    */
-  //TODO write this
+
   void noreplyWait(){
       _RqlQuery query = new _RqlQuery.fromConn(Query_QueryType.NOREPLY_WAIT,null,null);
       _start(query);
@@ -161,32 +164,29 @@ class _RqlConnection {
     }
   }
 
-  int responseLength = 0;
-  BytesBuilder responseBuilder = new BytesBuilder();
-
   void _handleProtoResponse(Uint8List response) {
-   
-    if (responseLength == 0) { // Fresh response is coming in
-      
+
+    if (_responseLength == 0) { // Fresh response is coming in
+
       Uint8List firstFourBytes = response.sublist(0, 4);
-      responseLength = _toInt(firstFourBytes);
-      responseBuilder.add(response.sublist(4));
-      
-    } else if (responseBuilder.length < responseLength) { 
-      responseBuilder.add(response);
+      _responseLength = _toInt(firstFourBytes);
+      _responseBuilder.add(response.sublist(4));
+
+    } else if (_responseBuilder.length < _responseLength) {
+      _responseBuilder.add(response);
     }
-   
+
     // Got the last piece of the wire data, it's safe to put it together.
-    if (responseBuilder.length >= responseLength) {
-      Uint8List completeResponse = responseBuilder.takeBytes();
+    if (_responseBuilder.length >= _responseLength) {
+      Uint8List completeResponse = _responseBuilder.takeBytes();
       Response protoResponse = new Response.fromBuffer(completeResponse);
- 
+
       _RqlQuery correlatedQuery = _replyQueries.remove(protoResponse.token);
       correlatedQuery._handleProtoResponse(protoResponse);
-      
-      responseBuilder.clear();
-      responseLength = 0;
-      
+
+      _responseBuilder.clear();
+      _responseLength = 0;
+
     }
   }
 
@@ -213,7 +213,7 @@ class _RqlConnection {
     this._sendQueue.addLast(query);
     return this._sendBuffer()._query.future;
   }
-  
+
   int _toInt(Uint8List bytes) {
     if (bytes.length != 4) {
       throw new ArgumentError('Byte array has to be 4 items long.');
