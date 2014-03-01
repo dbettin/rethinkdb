@@ -41,20 +41,32 @@ abstract class _RqlTerm {
   }
 
   noSuchMethod(Invocation invocation) {
-    var methodName = invocation.memberName;
-    List tmp = invocation.positionalArguments;
-          List args = [];
-          Map options = {};
-          for(var i=0; i < tmp.length; i++){
-            if(tmp[i] is Map && i == tmp.length-1)
-              options = tmp[i];
-            else
-              args.add(tmp[i]);
-          }
+      var methodName = invocation.memberName;
+      List tmp = invocation.positionalArguments;
+            List args = [];
+            Map options = null;
+            for(var i=0; i < tmp.length; i++){
+              if(tmp[i] is Map && i == tmp.length-1)
+                options = tmp[i];
+              else
+                args.add(tmp[i]);
+            }
 
-    if(methodName == const Symbol("withFields"))
-      return this.withFields(args);
-  }
+      if(methodName == const Symbol("withFields"))
+        return this.withFields(args);
+      if(methodName == const Symbol("contains"))
+        return this.contains(args);
+      if(methodName == const Symbol("pluck"))
+        return this.pluck(args);
+      if(methodName == const Symbol("without"))
+        return this.without(args);
+      if(methodName == const Symbol("hasFields"))
+        return this.hasFields(args);
+      if(methodName == const Symbol("orderBy"))
+        return this.orderBy(args,options);
+      if(methodName == const Symbol("groupBy"))
+        return this.groupBy(args.sublist(0,args.length-1), args[args.length-1]);
+    }
 
   //Comparison Operators
   _RqlEq eq(val) => new _RqlEq(this,val);
@@ -172,17 +184,31 @@ abstract class _RqlTerm {
 
   _RqlConcatMap concatMap(mappingFunction) => new _RqlConcatMap(this,_funcWrap(mappingFunction));
 
-  _RqlOrderBy orderBy(attrs){
-    if(attrs is List)
+  _RqlOrderBy orderBy(attrs,[index]){
+    var options = {};
+
+    if(attrs is List){
+      if(index is Map == false && index != null){
+        attrs.add(index);
+      }
       attrs.forEach((ob){
       if(ob is _RqlAsc || ob is _RqlDesc){
         //do nothing
       }
       else
         ob = _funcWrap(ob);
-    });
 
-    return new _RqlOrderBy(_listify(attrs));
+      });
+    }else{
+      List tmp = [];
+      tmp.add(attrs);
+      if(index is Map == false && index != null){
+        tmp.add(index);
+      }
+      attrs = tmp;
+    }
+
+    return new _RqlOrderBy(_listify(attrs),options);
   }
 
   _RqlBetween between(lowerKey,upperKey,[options]) => new _RqlBetween(this,lowerKey,upperKey,options);
@@ -209,7 +235,7 @@ abstract class _RqlTerm {
   _RqlGroupedMapReduce groupedMapReduce(grouping, mapping, reduction, [base])=>
       new _RqlGroupedMapReduce(this,_funcWrap(grouping),_funcWrap(mapping),_funcWrap(reduction),base);
 
-  _RqlGroupBy groupBy(String attr,reductionObj) => new _RqlGroupBy(this,attr,reductionObj);
+  _RqlGroupBy groupBy(attrs,reductionObj) => new _RqlGroupBy(this,_listify(attrs),reductionObj);
 
 
   _RqlGroup group(args,[options]) => new _RqlGroup(this,args,options);
@@ -486,7 +512,7 @@ class _RqlTable extends _RqlTerm {
     var methodName = invocation.memberName;
     List tmp = invocation.positionalArguments;
           List args = [];
-          Map options = {};
+          Map options = null;
           for(var i=0; i < tmp.length; i++){
             if(tmp[i] is Map && i == tmp.length-1)
               options = tmp[i];
@@ -502,6 +528,18 @@ class _RqlTable extends _RqlTerm {
       return this.indexWait(args);
     if(methodName == const Symbol("withFields"))
       return this.withFields(args);
+    if(methodName == const Symbol("contains"))
+      return this.contains(args);
+    if(methodName == const Symbol("pluck"))
+      return this.pluck(args);
+    if(methodName == const Symbol("without"))
+      return this.without(args);
+    if(methodName == const Symbol("hasFields"))
+      return this.hasFields(args);
+    if(methodName == const Symbol("orderBy"))
+      return this.orderBy(args,options);
+    if(methodName == const Symbol("groupBy"))
+      return this.groupBy(args.sublist(0,args.length-1), args[args.length-1]);
   }
 
 }
@@ -555,7 +593,7 @@ class _RqlConcatMap extends _RqlTerm {
 }
 
 class _RqlOrderBy extends _RqlTerm {
-  _RqlOrderBy(attrs) : super(Term_TermType.ORDERBY,_buildList(attrs));
+  _RqlOrderBy(attrs,[options]) : super(Term_TermType.ORDERBY,_buildList(attrs),options);
 }
 
 class _RqlDistinct extends _RqlTerm {

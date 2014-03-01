@@ -172,9 +172,9 @@ _RqlObject object(arg1,arg2) => new _RqlObject(arg1,arg2);
 /**
  * change the string to uppercase
  */
- _RqlUpcase upcase(String str) => new _RqlUpcase(str);
+ _RqlUpCase upcase(String str) => new _RqlUpCase(str);
 
  /**
   * Change a string to lowercase
   */
- _RqlDowncase downcase(String str) => new _RqlDowncase(str);
+ _RqlDownCase downcase(String str) => new _RqlDownCase(str);
