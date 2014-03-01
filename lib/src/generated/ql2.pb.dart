@@ -469,6 +469,13 @@ class Term_TermType extends ProtobufEnum {
   static const Term_TermType NOVEMBER = const Term_TermType._(124, 'NOVEMBER');
   static const Term_TermType DECEMBER = const Term_TermType._(125, 'DECEMBER');
   static const Term_TermType LITERAL = const Term_TermType._(137, 'LITERAL');
+  static const Term_TermType GROUP = const Term_TermType._(144, 'GROUP');
+  static const Term_TermType SUM = const Term_TermType._(145, 'SUM');
+  static const Term_TermType AVG = const Term_TermType._(146, 'AVG');
+  static const Term_TermType MIN = const Term_TermType._(147, 'MIN');
+  static const Term_TermType MAX = const Term_TermType._(148, 'MAX');
+  static const Term_TermType SPLIT = const Term_TermType._(149, 'SPLIT');
+  static const Term_TermType GROUPS_TO_ARRAY = const Term_TermType._(150, 'GROUPS_TO_ARRAY');
 
   static const List<Term_TermType> values = const <Term_TermType> [
     DATUM,
@@ -607,6 +614,13 @@ class Term_TermType extends ProtobufEnum {
     NOVEMBER,
     DECEMBER,
     LITERAL,
+    GROUP,
+    SUM,
+    AVG,
+    MIN,
+    MAX,
+    SPLIT,
+    GROUPS_TO_ARRAY,
   ];
 
   static final Map<int, Term_TermType> _byValue = ProtobufEnum.initByValue(values);

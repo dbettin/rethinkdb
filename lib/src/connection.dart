@@ -45,8 +45,8 @@ class _RqlConnection {
     return _connected.future;
   }
   /**
-   * Closes the current connection
-   */
+* Closes the current connection
+*/
   void close([opts]) {
     bool noReply = false;
     if(opts != null){
@@ -66,23 +66,23 @@ class _RqlConnection {
   }
 
   /**
-   * closes and reopens the current connection
-   */
+* closes and reopens the current connection
+*/
   void reconnect([opts]) {
     close(opts);
     _connect();
   }
 
   /**
-   * Alias for addListener
-  */
+* Alias for addListener
+*/
   void on(String key, Function val)
   {
     addListener(key,val);
   }
   /**
-   * Adds a listener to the connection.
-   */
+* Adds a listener to the connection.
+*/
   void addListener(String key, Function val)
   {
     List currentListeners = [];
@@ -93,16 +93,16 @@ class _RqlConnection {
     _listeners[key] = currentListeners;
   }
   /**
-   * Changes current database to [dbName]
-   */
+* Changes current database to [dbName]
+*/
   String use(String dbName) => _db = dbName;
 
   /**
-   *  ensures that previous queries with noreply flag have been processed by the server.
-   */
+* ensures that previous queries with noreply flag have been processed by the server.
+*/
 
   void noreplyWait(){
-      _RqlQuery query = new _RqlQuery.fromConn(Query_QueryType.NOREPLY_WAIT,null,null);
+      _RqlQuery query = new _RqlQuery.fromConn(Query_QueryType.NOREPLY_WAIT,null,null,null);
       _start(query);
   }
 
@@ -115,6 +115,7 @@ class _RqlConnection {
       _replyQueries[query.token] = query;
       return query;
     }
+    return null;
   }
 
   void _connect() {
@@ -181,7 +182,13 @@ class _RqlConnection {
       Uint8List completeResponse = _responseBuilder.takeBytes();
       Response protoResponse = new Response.fromBuffer(completeResponse);
 
-      _RqlQuery correlatedQuery = _replyQueries.remove(protoResponse.token);
+      _RqlQuery correlatedQuery = _replyQueries[protoResponse.token];
+      if(protoResponse.type == Response_ResponseType.SUCCESS_PARTIAL){
+        _RqlQuery query = new _RqlQuery.fromConn(Query_QueryType.CONTINUE,null,null,protoResponse.token);
+        _start(query);
+      }
+      else
+        _RqlQuery correlatedQuery = _replyQueries.remove(protoResponse.token);
       correlatedQuery._handleProtoResponse(protoResponse);
 
       _responseBuilder.clear();

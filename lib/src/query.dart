@@ -7,6 +7,7 @@ class _RqlQuery {
   Query _protoQuery;
   final Completer _query = new Completer();
   Int64 token;
+  var datumValue = [];
 
   static Int64 tokenCounter = Int64.ONE;
 
@@ -21,12 +22,14 @@ class _RqlQuery {
       new QueryOptionsBuilder(_protoQuery.globalOptargs).buildProtoOptions(options);
     }
   }
-  _RqlQuery.fromConn(_type,this._term,this.options){
+  _RqlQuery.fromConn(_type,this._term,this.options,token){
     _protoQuery = new Query();
     _protoQuery.type = _type;
-    token = tokenCounter++;
+    if(token == null)
+      token = tokenCounter++;
     _protoQuery.token = token;
   }
+
   _handleProtoResponse(Response protoResponse) {
     if (options != null && options["noReply"]==true) {
       _query.complete();
@@ -37,18 +40,15 @@ class _RqlQuery {
           _query.complete(datumValue);
           break;
         case Response_ResponseType.SUCCESS_SEQUENCE:
-          var datumValue = [];
           protoResponse.response.forEach((e){
           datumValue.add(_buildDatumResponseValue(e));
           });
           _query.complete(datumValue);
           break;
         case Response_ResponseType.SUCCESS_PARTIAL:
-          var datumValue = [];
           protoResponse.response.forEach((e){
           datumValue.add(_buildDatumResponseValue(e));
           });
-          _query.complete(datumValue);
           break;
         case Response_ResponseType.RUNTIME_ERROR:
           var datum = protoResponse.response.first;
