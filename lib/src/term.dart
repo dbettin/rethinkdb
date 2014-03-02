@@ -170,13 +170,13 @@ abstract class _RqlTerm {
 
   _RqlReduce reduce(reductionFunction,[base]) => new _RqlReduce(this,_funcWrap(reductionFunction),base);
 
-  _RqlSum sum(args) => new _RqlSum(this,args);
+  _RqlSum sum() => new _RqlSum(this);
 
-  _RqlAvg avg(args) => new _RqlAvg(this,args);
+  _RqlAvg avg() => new _RqlAvg(this);
 
-  _RqlMin min(args) => new _RqlMin(this,args);
+  _RqlMin min() => new _RqlMin(this);
 
-  _RqlMax max(args) => new _RqlMax(this,args);
+  _RqlMax max() => new _RqlMax(this);
 
   _RqlMap map(mappingFunction) => new _RqlMap(this,_funcWrap(mappingFunction));
 
@@ -235,7 +235,7 @@ abstract class _RqlTerm {
   _RqlGroupedMapReduce groupedMapReduce(grouping, mapping, reduction, [base])=>
       new _RqlGroupedMapReduce(this,_funcWrap(grouping),_funcWrap(mapping),_funcWrap(reduction),base);
 
-  _RqlGroupBy groupBy(attrs,reductionObj) => new _RqlGroupBy(this,_listify(attrs),reductionObj);
+  _RqlGroupBy groupBy(attrs,reductionObj) => new _RqlGroupBy(this,attrs,reductionObj);
 
 
   _RqlGroup group(args,[options]) => new _RqlGroup(this,args,options);
@@ -539,7 +539,7 @@ class _RqlTable extends _RqlTerm {
     if(methodName == const Symbol("orderBy"))
       return this.orderBy(args,options);
     if(methodName == const Symbol("groupBy"))
-      return this.groupBy(args.sublist(0,args.length-1), args[args.length-1]);
+      return this.groupBy(args, options);
   }
 
 }
@@ -565,19 +565,19 @@ class _RqlReduce extends _RqlTerm {
 }
 
 class _RqlSum extends _RqlTerm {
-  _RqlSum(obj,attr) : super(Term_TermType.SUM,[obj,attr]);
+  _RqlSum(obj) : super(Term_TermType.SUM,[obj]);
 }
 
 class _RqlAvg extends _RqlTerm {
-  _RqlAvg(obj,attr) : super(Term_TermType.AVG,[obj,attr]);
+  _RqlAvg(obj) : super(Term_TermType.AVG,[obj]);
 }
 
 class _RqlMin extends _RqlTerm {
-  _RqlMin(obj,attr) : super(Term_TermType.MIN,[obj,attr]);
+  _RqlMin(obj) : super(Term_TermType.MIN,[obj]);
 }
 
 class _RqlMax extends _RqlTerm {
-  _RqlMax(obj,attr) : super(Term_TermType.MAX,[obj,attr]);
+  _RqlMax(obj) : super(Term_TermType.MAX,[obj]);
 }
 
 class _RqlMap extends _RqlTerm {
