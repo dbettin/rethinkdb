@@ -1,5 +1,4 @@
 import 'lib/rethinkdb_driver.dart' as r;
-import 'dart:async';
 
 main() {
   /**start the connection that returns a future
@@ -8,38 +7,15 @@ main() {
 */
   r.connect(db: "test",port: 28015).then((connection)=>exampleCommands(connection));
 }
-Future exampleCommands(conn)
+exampleCommands(conn)
 {
-
-  /**dbCreate() takes a string for the name of the database to be created and returns a CreatedResponse**/
-
-  //r.dbCreate("app_db").run(conn).then((response)=>print(response));
-
-  //r.dbCreate("bad_db").run(conn).then((response)=>print(response));
-
-
-
-  /**dbList() lists the databases in the system**/
-
-  //r.dbList().run(conn).then((response)=>print(response));
-
-
-
-  /**dbDrop() drops the speficied database**/
-
-  //r.dbDrop("bad_db").run(conn).then((response)=>print(response));
-
-
-
   /**use() changes the default database on the connection**/
   //conn.use("app_db");
-
 
 
   /** noreplyWait() waits for any queries with the noreply option to run**/
 
   //conn.noreplyWait();
-
 
 
   /**addListener allows you to listen to changes in connection state. 'on' can be used as well.**/
@@ -49,19 +25,481 @@ Future exampleCommands(conn)
   //conn.on("close",()=>print("Connection Closed!"));
 
 
+  /**dbCreate() takes a string for the name of the database to be created and returns a CreatedResponse**/
 
-  /**table() selects a table for the given database**/
+  //r.dbCreate("app_db").run(conn).then((response)=>print(response));
+
+
+  /**dbDrop() takes a string for the database to be dropped**/
+
+  //r.dbDrop("app_db").run(conn).then((response)=>print(response));
+
+
+  /**dbList() lists the databases in the system**/
+
+  //r.dbList().run(conn).then((response)=>print(response));
+
+
+  /**tableCreate creates a table in the specified database**/
+
+  //r.tableCreate("animals").run(conn).then((response)=>print(response));
+
+  //r.db("test").tableCreate("people").run(conn).then((response)=>print(response));
+
+
+  /**tableDrop removes a table from a database**/
+
+  //r.tableDrop("people").run(conn).then((response)=>print(response));
+
+  /**tableList lists the tables in the database**/
+  //r.tableList().run(conn).then((response)=>print(response));
+
+  /**indexCreate creates an index on the specified table**/
+
+  //r.table("animals").indexCreate("kingdom").run(conn).then((response)=>print(response));
+
+  //r.db("test").table("animals").indexCreate("number_in_wild").run(conn).then((response)=>print(response));
+
+  //r.table("animals").indexCreate("phylum").run(conn).then((response)=>print(response));
+
+
+  /**indexDrop drops the index from the table**/
+
+  //r.table("animals").indexDrop("phylum").run(conn).then((response)=>print(response));
+
+
+  /**indexList lists the indexes for a table**/
+
+  //r.table("animals").indexList().run(conn).then((response)=>print(response));
+
+
+  /**indexStatus() returns the status of the index**/
+
+  //r.table("animals").indexStatus().run(conn).then((response)=>print(response));
+
+  //r.table("animals").indexStatus("phylum").run(conn).then((response)=>print(response));
+
+
+  /**indexWait() waits for an index to be ready**/
+
+  //r.table("animals").indexWait("phylum").run(conn).then((response)=>print(response));
+
+  //r.table("animals").indexWait().run(conn).then((response)=>print(response));
+
+
+  /**insert() inserts records into a table**/
+
+  //r.table("animals").insert({"id":"cheetah","number_in_wild":4000,"kingdom":"cat","phylum":"cat also","locations":["jungle","zoo"]}).run(conn).then((response)=>print(response));
+
+  //List animalsToAdd = [
+     //{"id":"zebra","number_in_wild":2000,"kingdom":"horse","phylum":"horse also","locations":["jungle","zoo"]},
+     //{"id":"sloth","number_in_wild":5000,"kingdom":"bear i guess","phylum":"bear also","locations":["jungle","zoo"]}
+     //                  ];
+  //r.table("animals").insert(animalsToAdd).run(conn).then((response)=>print(response));
+
+
+  /**update updates matching records**/
+
+  //r.table("animals").update({"number_in_wild":1500}).run(conn).then((response)=>print(response));
+
+
+  /** replace replaces a record **/
+
+  //r.table("animals").get("sloth").replace({"id":"sloth","number_in_wild":2000,"kingdom":"not a bear","phylum":"not the same as a bear"}).run(conn).then((response)=>print(response));
+
+
+  /**delete deletes a record**/
+
+  //r.table("animals").get("sloth").delete().run(conn).then((response)=>print(response));
+
+
+  /**sync ensures the table has been written**/
+
+  //r.table("animals").sync().run(conn).then((response)=>print(response));
+
+
+  /**db returns a refrence to the database to be chained with other commands**/
+
+  //r.db("test").table("animals").run(conn).then((response)=>print(response));
+
+
+
+  /**table() selects all documents for the given database**/
 
   //r.table("animals").run(conn).then((response)=>print(response));
 
-  //r.db("test").table("users").run(conn).then((response)=>print(response));
+
+  /**get retrieves a document by the primary key**/
+
+  //r.table("animals").get("zebra").run(conn).then((response)=>print(response));
 
 
-  /**table can be chained with other commands to select data**/
-  //r.table("animals").get("cheetah").pluck("number_in_wild").run(conn).then((response)=>print(response));
+  /**getAll retrieves documents matching any all keys**/
+
+  //r.table("animals").getAll("zebra","cheetah",{"index":"id"}).run(conn).then((response)=>print(response));
+
+  //r.table("animals").getAll(["zebra","cheetah"]).run(conn).then((response)=>print(response));
+
+  //r.table("animals").getAll(["horse"],{"index":"kingdom"}).run(conn).then((response)=>print(response));
+
+  //r.table("animals").getAll("cat",{"index":"kingdom"}).run(conn).then((response)=>print(response));
 
 
+  /**between gets all documents with a key between two values**/
 
+  //r.table("animals").between(0,1501,{"index":"number_in_wild"}).run(conn).then((response)=>print(response));
+
+
+  /**filter() filters based on the predicate**/
+
+  //r.table("animals").filter({"kingdom":"cat"}).run(conn).then((response)=>print(response));
+
+
+  /**innerJoin returns the inner product of two sequences**/
+  //r.expr([1,2,3,4,5]).innerJoin([2,3],(row1,row2)=>row1.lt(row2)).run(conn).then((response)=>print(response));
+
+
+  /**outerJoin returns the left outer join**/
+  //r.expr([1,2,3,4,5]).outerJoin([2,3],(row1,row2)=>row1.lt(row2)).run(conn).then((response)=>print(response));
+
+
+  /**eqJoin**/
+
+  //r.expr([{"id":1500}]).eqJoin("id",r.table("animals"),{"index":"number_in_wild"}).run(conn).then((response)=>print(response));
+
+  /**zip**/
+  //r.expr([{"id":1500}]).eqJoin("id",r.table("animals"),{"index":"number_in_wild"}).zip().run(conn).then((response)=>print(response));
+
+
+  /**map**/
+
+  //r.expr([1,2,3,4,5]).map((num)=>num.add(1)).run(conn).then((response)=>print(response));
+
+
+  /**withfields**/
+  //TODO fix
+  //r.table("animals").withFields(["id"]).run(conn).then((response)=>print(response));
+
+  /**concatMap works like a reduce**/
+
+  //r.table("animals").concatMap((animal)=>animal("locations")).run(conn).then((response)=>print(response));
+
+
+  /**orderBy specifies the property to order by**/
+
+  //r.table("animals").orderBy(r.asc("number_in_wild")).run(conn).then((response)=>print(response));
+
+
+  /**skip() skips the number of records specified**/
+
+  //r.table("animals").orderBy(r.asc("number_in_wild")).skip(1).run(conn).then((response)=>print(response));
+
+
+  /**limit() returns no more records than specified**/
+
+  //r.table("animals").limit(4).run(conn).then((response)=>print(response));
+
+
+  /**slice trims the results to the indexes specified**/
+
+  //r.table("animals").slice(0,1).run(conn).then((response)=>print(response));
+
+
+  /**nth returns the nth element**/
+
+  //r.expr(["a","b","c"]).nth(2).run(conn).then((response)=>print(response));
+
+
+  /**indexes of returns all indexes of an element**/
+
+  //r.expr(["c","a","b","c"]).indexesOf("c").run(conn).then((response)=>print(response));
+
+
+  /**isEmpty() checks if the sequence is empty**/
+
+  //r.table("animals").isEmpty().run(conn).then((response)=>print(response));
+
+  //r.expr([]).isEmpty().run(conn).then((response)=>print(response));
+
+
+  /**union concats two sequences**/
+
+  //r.expr([1,2,3]).union([4,5,6]).run(conn).then((response)=>print(response));
+
+
+  /**sample selects uniform random distribution of a sequence**/
+
+  //r.expr([1,2,3,4,5,6,7,8,9]).sample(3).run(conn).then((response)=>print(response));
+
+
+  /**group Takes a stream and partitions it into multiple groups based on the fields or functions provided**/
+
+  //r.table("animals").group("number_in_wild").run(conn).then((response)=>print(response));
+
+
+  /**ungroup Takes a grouped stream or grouped data and turns it into an array of objects representing the groups**/
+
+  //r.table("animals").group("number_in_wild").ungroup().run(conn).then((response)=>print(response));
+
+
+  /**reduce Produces a single value from a sequence through repeated application of a reduction function.**/
+  //TODO fix reduce
+  //r.table("animals").map((doc)=>1).reduce((left,right)=>left).run(conn).then((response)=>print(response));
+
+
+  /**count counts the objects in a sequence**/
+
+  //r.table("animals").count().run(conn).then((response)=>print(response));
+
+
+  /**sum adds all objects in a sequence**/
+
+  //r.expr([3,4]).sum().run(conn).then((response)=>print(response));
+
+  /**avg averages objects in a sequence**/
+
+  //r.expr([1,4,8,16]).avg().run(conn).then((response)=>print(response));
+
+  /**min finds the smallest of a sequence**/
+
+  //r.expr([100,4,28,588]).min().run(conn).then((response)=>print(response));
+
+
+  /**max finds the maximum of a sequence**/
+
+  //r.expr([8,24,3,5]).max().run(conn).then((response)=>print(response));
+
+
+  /**distinct removes duplicates**/
+
+  //r.expr([1,2,2]).distinct().run(conn).then((response)=>print(response));
+
+
+  /**contains returns whether or not a sequence contains an item**/
+
+  //r.expr([1,2,3]).contains(3).run(conn).then((response)=>print(response));
+
+  /**row**/
+  //TODO fix r.row
+  //r.table("animals").filter((row)=>row("number_in_wild").gt(1400)).run(conn).then((response)=>print(response));
+
+  /**pluck selects fields specified**/
+
+  //r.table("animals").get("cheetah").pluck(["number_in_wild","kingdom"]).run(conn).then((response)=>print(response));
+
+
+  /**without returns everything BUT the specified fields**/
+
+  //r.table("animals").get("cheetah").without("number_in_wild","kingdom").run(conn).then((response)=>print(response));
+
+
+  /**merge merges two objects together**/
+
+  //r.expr({"id":1}).merge({"name":"User"}).run(conn).then((response)=>print(response));
+
+
+  /**append adds an item to the end of an array**/
+
+  //r.expr([1,2,3]).append("end").run(conn).then((response)=>print(response));
+
+
+  /**prepend adds an item to the beginning of an array**/
+
+  //r.expr([1,2,3]).prepend("begin").run(conn).then((response)=>print(response));
+
+
+  /**difference removes the elements from one array to another**/
+
+  //r.expr([1,2,3,4,5]).difference([1,5]).run(conn).then((response)=>print(response));
+
+
+  /**setInsert, inserts an element into an array but treats the array as a set (removes duplicates)**/
+
+  //r.expr([1,3,5,7,9,9]).setInsert(1).run(conn).then((response)=>print(response));
+
+
+  /**setUnion, inserts many elements into an array but treats array as set**/
+
+  //r.expr([1,3,5,7,9,9]).setUnion([1,2,3,4,5,6,7,8,9]).run(conn).then((response)=>print(response));
+
+
+  /**setIntersection intersects two arrays as sets**/
+
+  //r.expr([1,3,5,7,9,9]).setIntersection([1,2,4,6,8,8,9]).run(conn).then((response)=>print(response));
+
+
+  /**setDifference, opposite of setIntersection**/
+
+  //r.expr([1,3,5,7,9,9]).setDifference([1,2,4,6,8,8,9]).run(conn).then((response)=>print(response));
+
+
+  /**( ) gets a single field for an object**/
+
+  //r.table("animals").get("cheetah")("kingdom").run(conn).then((response)=>print(response));
+
+  //r.expr({"id":1,"name":"ted","age":77})("name").run(conn).then((response)=>print(response));
+
+  /**hasFields tests if an object has a certain field or fields**/
+  //TODO fix hasFields
+  //r.table("animals").hasFields("kingdom").run(conn).then((response)=>print(response));
+
+
+  /**insertAt inserts an object into an array at a given index**/
+
+  //r.expr([1,2,3,5]).insertAt(3,4).run(conn).then((response)=>print(response));
+
+
+  /**splice at inserts multiple values starting at the index specified**/
+
+  //r.expr([1,2,3,6]).spliceAt(3,[4,5]).run(conn).then((response)=>print(response));
+
+
+  /**deleteAt removes the item at the specified index**/
+
+  //r.expr([1,2,3,0,4]).deleteAt(3).run(conn).then((response)=>print(response));
+
+
+  /**change at replaces the item at the specified index**/
+
+  //r.expr([1,2,4,4]).changeAt(2,3).run(conn).then((response)=>print(response));
+
+
+  /**keys returns the keys for a row**/
+
+  //r.table("animals").get("cheetah").keys().run(conn).then((response)=>print(response));
+
+
+  /**object creates an object from key value pairs**/
+  //TODO fix to allow multiple key/valu pairs
+  //r.object("A","first").run(conn).then((response)=>print(response));
+
+
+  /**match matches a string for a regexp**/
+
+  //r.table("animals").filter((animal)=>animal("id").match("cheetah")).run(conn).then((response)=>print(response));
+
+
+  /**split splits a string into two substrings**/
+
+  //r.expr("this is a sentence.").split().run(conn).then((response)=>print(response));
+
+
+  /**upcase changes a string to uppercase**/
+
+  //r.expr("stringy").upcase().run(conn).then((response)=>print(response));
+
+
+  /**downcase changes a string to lowercase**/
+
+  //r.expr("This Works Too").downcase().run(conn).then((response)=>print(response));
+
+
+  /**add adds or concatenates, depending on type**/
+
+  //r.expr(2).add(2).run(conn).then((response)=>print(response));
+
+  //r.expr([1,2,3]).add([4,5,6]).run(conn).then((response)=>print(response));
+
+
+  /**sub subtracts two numbers**/
+
+  //r.expr(5).sub(2).run(conn).then((response)=>print(response));
+
+
+  /** mul multiplies**/
+
+  //r.expr(2).mul(2).run(conn).then((response)=>print(response));
+
+
+  /** div divides**/
+
+  //r.expr(1).div(2).run(conn).then((response)=>print(response));
+
+
+  /**mod gives the remainder**/
+
+  //r.expr(3).mod(2).run(conn).then((response)=>print(response));
+
+
+  /**and computes the logical and of two values**/
+
+  //r.expr(true).and(false).run(conn).then((response)=>print(response));
+
+
+  /**or computes the logical or**/
+
+  //r.expr(true).or(false).run(conn).then((response)=>print(response));
+
+
+  /**eq evaluates equality**/
+
+  //r.expr(2).eq(2).run(conn).then((response)=>print(response));
+
+
+  /**ne evaluates inequality**/
+
+  //r.expr(2).ne(3).run(conn).then((response)=>print(response));
+
+
+  /**gt tests if first value is greater than second**/
+
+  //r.expr(3).gt(2).run(conn).then((response)=>print(response));
+
+
+  /**lt tests if first value is less than the second**/
+
+  //r.expr(3).lt(2).run(conn).then((response)=>print(response));
+
+
+  /**le tests if first value is less than or equal to second**/
+
+  //r.expr(3).le(2).run(conn).then((response)=>print(response));
+
+  /**ge tests if first value is greater than or equal to second**/
+
+  //r.expr(3).ge(2).run(conn).then((response)=>print(response));
+
+
+  /**not computes the logical inverse**/
+
+  //r.expr(false).not().run(conn).then((response)=>print(response));
+
+
+  /**now returns the current time**/
+
+  //r.now().run(conn).then((response)=>print(response));
+
+
+  /**time creates a new date object**/
+
+  //r.time(1986, 11, 3, 'Z').run(conn).then((response)=>print(response));
+
+
+  /**epochTime returns the time**/
+  //r.epochTime(531360000).run(conn).then((response)=>print(response));
+
+
+  /**ISO8601 creates a time object based on an iso8601 date string**/
+
+  //r.ISO8601('1986-11-03T08:30:00-07:00').run(conn).then((response)=>print(response));
+
+
+  /**inTimeZone returns the same date but in a different timezone**/
+
+  //r.now().inTimezone('-08:00').run(conn).then((response)=>print(response));
+
+
+  /**timezone returns the timezone for a date**/
+  //r.now().timezone().eq("-00:00").run(conn).then((response)=>print(response));
+
+  //TODO put in examples of other time functions
+
+  /**toISO8601 returns the time as an iso8601 string**/
+
+  //r.now().toISO8601().run(conn).then((response)=>print(response));
   /**for more information check out the rethinkdb javascript API.**/
+
+
+
 
 }

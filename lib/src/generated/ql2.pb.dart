@@ -9,10 +9,12 @@ import 'package:protobuf/protobuf.dart';
 class VersionDummy_Version extends ProtobufEnum {
   static const VersionDummy_Version V0_1 = const VersionDummy_Version._(1063369270, 'V0_1');
   static const VersionDummy_Version V0_2 = const VersionDummy_Version._(1915781601, 'V0_2');
+  static const VersionDummy_Version V0_2_JSON = const VersionDummy_Version._(1584539450, 'V0_2_JSON');
 
   static const List<VersionDummy_Version> values = const <VersionDummy_Version> [
     V0_1,
     V0_2,
+    V0_2_JSON,
   ];
 
   static final Map<int, VersionDummy_Version> _byValue = ProtobufEnum.initByValue(values);
@@ -387,8 +389,6 @@ class Term_TermType extends ProtobufEnum {
   static const Term_TermType IS_EMPTY = const Term_TermType._(86, 'IS_EMPTY');
   static const Term_TermType UNION = const Term_TermType._(44, 'UNION');
   static const Term_TermType NTH = const Term_TermType._(45, 'NTH');
-  static const Term_TermType GROUPED_MAP_REDUCE = const Term_TermType._(46, 'GROUPED_MAP_REDUCE');
-  static const Term_TermType GROUPBY = const Term_TermType._(47, 'GROUPBY');
   static const Term_TermType INNER_JOIN = const Term_TermType._(48, 'INNER_JOIN');
   static const Term_TermType OUTER_JOIN = const Term_TermType._(49, 'OUTER_JOIN');
   static const Term_TermType EQ_JOIN = const Term_TermType._(50, 'EQ_JOIN');
@@ -475,7 +475,7 @@ class Term_TermType extends ProtobufEnum {
   static const Term_TermType MIN = const Term_TermType._(147, 'MIN');
   static const Term_TermType MAX = const Term_TermType._(148, 'MAX');
   static const Term_TermType SPLIT = const Term_TermType._(149, 'SPLIT');
-  static const Term_TermType GROUPS_TO_ARRAY = const Term_TermType._(150, 'GROUPS_TO_ARRAY');
+  static const Term_TermType UNGROUP = const Term_TermType._(150, 'UNGROUP');
 
   static const List<Term_TermType> values = const <Term_TermType> [
     DATUM,
@@ -532,8 +532,6 @@ class Term_TermType extends ProtobufEnum {
     IS_EMPTY,
     UNION,
     NTH,
-    GROUPED_MAP_REDUCE,
-    GROUPBY,
     INNER_JOIN,
     OUTER_JOIN,
     EQ_JOIN,
@@ -620,7 +618,7 @@ class Term_TermType extends ProtobufEnum {
     MIN,
     MAX,
     SPLIT,
-    GROUPS_TO_ARRAY,
+    UNGROUP,
   ];
 
   static final Map<int, Term_TermType> _byValue = ProtobufEnum.initByValue(values);

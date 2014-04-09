@@ -64,8 +64,7 @@ abstract class _RqlTerm {
         return this.hasFields(args);
       if(methodName == const Symbol("orderBy"))
         return this.orderBy(args,options);
-      if(methodName == const Symbol("groupBy"))
-        return this.groupBy(args.sublist(0,args.length-1), args[args.length-1]);
+
     }
 
   //Comparison Operators
@@ -125,8 +124,6 @@ abstract class _RqlTerm {
   //Type inspection
   _RqlCoerceTo coerceTo(String type) => new _RqlCoerceTo(this,type);
 
-  _RqlGroupsToArray groupsToArray() => new _RqlGroupsToArray(this);
-
   _RqlTypeOf typeOf() => new _RqlTypeOf(this);
 
   _RqlMerge merge(obj) => new _RqlMerge(this,obj);
@@ -152,7 +149,7 @@ abstract class _RqlTerm {
 
   _RqlMatch match(String regex) => new _RqlMatch(this,regex);
 
-  _RqlSplit split(args) => new _RqlSplit(this,args);
+  _RqlSplit split([seperator=" ",maxSplits]) => new _RqlSplit(this,seperator,maxSplits);
 
   _RqlUpCase upcase() => new _RqlUpCase(this);
 
@@ -232,13 +229,9 @@ abstract class _RqlTerm {
   _RqlZip zip() => new _RqlZip(this);
 
 
-  _RqlGroupedMapReduce groupedMapReduce(grouping, mapping, reduction, [base])=>
-      new _RqlGroupedMapReduce(this,_funcWrap(grouping),_funcWrap(mapping),_funcWrap(reduction),base);
-
-  _RqlGroupBy groupBy(attrs,reductionObj) => new _RqlGroupBy(this,attrs,reductionObj);
-
-
   _RqlGroup group(args,[options]) => new _RqlGroup(this,args,options);
+
+  _RqlUngroup ungroup() =>new _RqlUngroup(this);
 
   _RqlForEach forEach(write_query) => new _RqlForEach(this,_funcWrap(write_query));
 
@@ -538,8 +531,7 @@ class _RqlTable extends _RqlTerm {
       return this.hasFields(args);
     if(methodName == const Symbol("orderBy"))
       return this.orderBy(args,options);
-    if(methodName == const Symbol("groupBy"))
-      return this.groupBy(args, options);
+
   }
 
 }
@@ -617,7 +609,7 @@ class _RqlMatch extends _RqlTerm {
 }
 
 class _RqlSplit extends _RqlTerm {
-  _RqlSplit(tbl,obj) : super(Term_TermType.SPLIT,[tbl,obj]);
+  _RqlSplit(tbl,obj,maxSplits) : super(Term_TermType.SPLIT,[tbl,obj,maxSplits]);
 }
 
 class _RqlUpCase extends _RqlTerm {
@@ -640,12 +632,9 @@ class _RqlGroup extends _RqlTerm {
   _RqlGroup(obj,group,[options]) : super(Term_TermType.GROUP,[obj,group],options);
 }
 
-class _RqlGroupedMapReduce extends _RqlTerm {
-  _RqlGroupedMapReduce(seq,grouping,mapping,reduction,base) : super(Term_TermType.GROUPED_MAP_REDUCE,[seq,grouping,mapping,reduction,base]);
-}
+class _RqlUngroup extends _RqlTerm {
 
-class _RqlGroupBy extends _RqlTerm {
-  _RqlGroupBy(groupable,selector,reductionObject) : super(Term_TermType.GROUPBY,[groupable, selector,reductionObject]);
+  _RqlUngroup(obj) : super(Term_TermType.UNGROUP,[obj]);
 }
 
 class _RqlInnerJoin extends _RqlTerm {
@@ -666,10 +655,6 @@ class _RqlZip extends _RqlTerm {
 
 class _RqlCoerceTo extends _RqlTerm {
   _RqlCoerceTo(obj,String type) : super(Term_TermType.COERCE_TO,[obj,type]);
-}
-
-class _RqlGroupsToArray extends _RqlTerm {
-  _RqlGroupsToArray(obj) : super(Term_TermType.GROUPS_TO_ARRAY,[obj]);
 }
 
 class _RqlTypeOf extends _RqlTerm {
