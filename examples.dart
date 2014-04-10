@@ -102,8 +102,7 @@ exampleCommands(conn)
 
   /**update updates matching records**/
 
-  //r.table("animals").update({"number_in_wild":1500}).run(conn).then((response)=>print(response));
-
+  //r.table("animals").update({"last_seen":r.time(2012,1,21,'Z')}).run(conn).then((response)=>print(response));
 
   /** replace replaces a record **/
 
@@ -496,11 +495,131 @@ exampleCommands(conn)
   /**timezone returns the timezone for a date**/
   //r.now().timezone().eq("-00:00").run(conn).then((response)=>print(response));
 
-  //TODO put in examples of other time functions
 
-  /**toISO8601 returns the time as an iso8601 string**/
+  /**during returns if a time is between two others**/
+
+  //r.table("animals").filter(r.row("last_seen").during(r.time(2010, 1, 1, 'Z'),r.time(2014, 12, 31, 'Z'))).run(conn).then((response)=>print(response));
+
+
+  /**date returns the day, month, and year**/
+
+  //r.table("animals").filter(r.row("last_seen").date().ge(r.now().date())).run(conn).then((response)=>print(response));
+
+
+  /**timeOfDay returns the number of seconds elapsed since the beginning of the day**/
+
+  //r.now().timeOfDay().run(conn).then((response)=>print(response));
+
+  /**year returns the year of the time object**/
+
+  //r.now().year().run(conn).then((response)=>print(response));
+
+
+  /**month returns the integer representing the month**/
+
+  //r.now().month().run(conn).then((response)=>print(response));
+
+
+  /**day returns the day **/
+
+  //r.now().day().run(conn).then((response)=>print(response));
+
+
+  /**day of week returns the number of the day of the week**/
+
+  //r.now().dayOfWeek().run(conn).then((response)=>print(response));
+
+
+  /**r.monday,r.tuesday ... are mapped to the proper integers**/
+
+  //r.now().dayOfWeek().eq(r.thursday).run(conn).then((response)=>print(response));
+
+
+  /**day of year returns the integer day between 1 and 366**/
+
+  //r.now().dayOfYear().run(conn).then((response)=>print(response));
+
+
+  /**hours returns the hours between 0 and 23 **/
+
+  //r.now().hours().run(conn).then((response)=>print(response));
+
+
+  /**minutes gives the number of minutes in the hour**/
+
+  //r.now().minutes().run(conn).then((response)=>print(response));
+
+
+  /**seconds gives the number of seconds in the minute between 0 and 60 **/
+
+  //r.now().seconds().run(conn).then((response)=>print(response));
+
+
+  /**toISO8601 returns a date as the iso8601 string **/
 
   //r.now().toISO8601().run(conn).then((response)=>print(response));
+
+
+  /** toEpochTime returns the time object as epoch time**/
+
+  //r.now().toEpochTime().run(conn).then((response)=>print(response));
+
+
+  /**rqlDo is equivalent to the javascript r.do function, do is a keyword in dart**/
+
+  //r.rqlDo(r.table("animals").get("cheetah"),(animal)=>animal("locations")).run(conn).then((response)=>print(response));
+
+  //r.table("animals").get("cheetah").rqlDo((animal)=>animal("locations")).run(conn).then((response)=>print(response));
+
+  /**branch is an if statement, it accepts a test, a true value and a false value**/
+
+  //r.branch(true, "it is true", "it is false").run(conn).then((response)=>print(response));
+
+
+  /**forEach loops through each item**/
+
+  //r.table("animals").forEach((animal)=>animal.pluck("id","locations")).run(conn).then((response)=>print(response));
+
+
+  /**error throws an error**/
+
+  //r.error("impossible!").run(conn).then((response)=>print(response));
+
+
+  /**defaultTo will return a default value if one is not found**/
+
+  //r.table("animals").map((animal)=>{"id":animal("id"),"favorite_food":animal("favorite_food").defaultTo("candy")}).run(conn).then((response)=>print(response));
+
+
+  /**expr constructs a native reql json object**/
+
+  //r.expr(1).run(conn).then((response)=>print(response));
+
+
+  /**js creates javascript expressions**/
+
+  //r.js("new Date();").run(conn).then((response)=>print(response));
+
+
+  /**coerceTo converts one object type to another**/
+
+  //r.expr(1).coerceTo("string").run(conn).then((response)=>print(response));
+
+
+  /**typeOf returns the type**/
+
+  //r.expr(1).typeOf().run(conn).then((response)=>print(response));
+
+
+  /**info returns any available info**/
+
+  //r.table("animals").info().run(conn).then((response)=>print(response));
+
+
+  /**json parses a json string on the server**/
+
+  //r.json("[1,2,3]").run(conn).then((response)=>print(response));
+
   /**for more information check out the rethinkdb javascript API.**/
 
 

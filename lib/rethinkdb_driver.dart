@@ -120,7 +120,7 @@ _RqlNow now() => new _RqlNow();
  * Evaluate the expr in the context of one or more value bindings.
  * The type of the result is the type of the value returned from expr.
  */
-_RqlDo reqlDo(arg,[args,expr]) => new _RqlDo(arg,[args],expr);
+_RqlDo rqlDo(arg,[expr]) => new _RqlDo(arg,expr);
 
 /**
  * If the test expression returns false or null, the [falseBranch] will be executed.
@@ -179,6 +179,8 @@ _RqlObject object(args) => new _RqlObject(args);
   */
  _RqlDownCase downcase(String str) => new _RqlDownCase(str);
 
+ _RqlTerm expr(val) => _expr(val);
+
  noSuchMethod(Invocation invocation) {
        var methodName = invocation.memberName;
        List tmp = invocation.positionalArguments;
@@ -193,5 +195,15 @@ _RqlObject object(args) => new _RqlObject(args);
 
        if(methodName == const Symbol("object"))
          return this.object(args);
+       if(methodName == const Symbol("rqlDo"))
+         return this.rqlDo(args.sublist(0, args.length-1),args[args.length-1]);
      }
+
+int monday = 1;
+int tuesday = 2;
+int wednesday = 3;
+int thursday = 4;
+int friday = 5;
+int saturday = 6;
+int sunday = 7;
 }

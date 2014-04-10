@@ -9,10 +9,10 @@ abstract class _RqlTerm {
 
   _RqlTerm(Term_TermType this._termType, [List args, Map options]){
     if(args != null)
-      args.forEach((e)=> this._args.add(expr(e)));
+      args.forEach((e)=> this._args.add(_expr(e)));
     if(options != null)
     options.forEach((k,v){
-      this._options[k] = expr(options[k]);
+      this._options[k] = _expr(options[k]);
     });
   }
 
@@ -52,6 +52,14 @@ abstract class _RqlTerm {
                 args.add(tmp[i]);
             }
 
+
+
+      if(methodName == const Symbol("getAll"))
+        return this.getAll(args,options);
+      if(methodName == const Symbol("indexStatus"))
+        return this.indexStatus(args);
+      if(methodName == const Symbol("indexWait"))
+        return this.indexWait(args);
       if(methodName == const Symbol("withFields"))
         return this.withFields(args);
       if(methodName == const Symbol("contains"))
@@ -64,6 +72,8 @@ abstract class _RqlTerm {
         return this.hasFields(args);
       if(methodName == const Symbol("orderBy"))
         return this.orderBy(args,options);
+      if(methodName == const Symbol("rqlDo"))
+        return this.rqlDo(args.sublist(0, args.length-1),args[args.length-1]);
 
     }
 
@@ -98,6 +108,23 @@ abstract class _RqlTerm {
   _RqlOr or(b) => new _RqlOr(this,b);
 
 
+
+  _RqlInsert insert(records,[options]) => new _RqlInsert(this,records,options);
+
+  _RqlGet get(key) => new _RqlGet(this,key);
+
+  _RqlIndexCreate indexCreate(String index,[Function indexFunction]) => new _RqlIndexCreate(this,index,_funcWrap(indexFunction));
+
+  _RqlIndexDrop indexDrop(String index) => new _RqlIndexDrop(this,index);
+
+  _RqlIndexList indexList() => new _RqlIndexList(this);
+
+  _RqlIndexStatus indexStatus([index]) => new _RqlIndexStatus(_listify(index));
+
+  _RqlIndexWait indexWait([index]) =>  new _RqlIndexWait(_listify(index));
+
+  _RqlSync sync() => new _RqlSync(this);
+
   _RqlContains contains(items) => new _RqlContains(_listify(items,true));
 
   _RqlHasFields hasFields(items) => new _RqlHasFields(this,items);
@@ -111,7 +138,7 @@ abstract class _RqlTerm {
 
   _RqlWithout without(items) => new _RqlWithout(_listify(items));
 
-  _RqlDo reqlDo(arg,expr) => new _RqlDo(this, arg,_funcWrap(expr));
+  _RqlDo rqlDo(arg,expression) => new _RqlDo(_listify(arg), _funcWrap(expression));
 
   _RqlDefault defaultTo(value) => new _RqlDefault(this,value);
 
@@ -142,6 +169,7 @@ abstract class _RqlTerm {
 
   _RqlSetDifference setDifference(ar) => new _RqlSetDifference(this,ar);
 
+  _RqlGetAll getAll(keys,[Map options]) => new _RqlGetAll(_listify(keys),options);
 
   _RqlGetField getField(index) => new _RqlGetField(this,index);
 
@@ -300,8 +328,6 @@ abstract class _RqlTerm {
 
 class _RqlMakeArray extends _RqlTerm {
   _RqlMakeArray(attrs) : super(Term_TermType.MAKE_ARRAY,attrs);
-
-  _RqlDo reqlDo(arg,expression) => new _RqlDo(this, arg,_funcWrap(expression));
 }
 
 class _RqlMakeObj extends _RqlTerm {
@@ -471,68 +497,17 @@ class _RqlDatabase extends _RqlTerm {
 
    _RqlTableDropFromDb tableDrop(String tableName) => new _RqlTableDropFromDb(this,tableName);
 
-    _RqlTable table(String tableName) => new _RqlTable.fromDb(this,tableName);
+   _RqlTable table(String tableName) => new _RqlTable.fromDb(this,tableName);
 }
 
 class _RqlDo extends _RqlTerm {
-  _RqlDo(obj, args,expression) : super(Term_TermType.FUNCALL,[obj, args, expression]);
+  _RqlDo(args,expression) : super(Term_TermType.FUNCALL,[expression,args]);
 }
 
 class _RqlTable extends _RqlTerm {
   _RqlTable(String tableName, [options]):super(Term_TermType.TABLE,[tableName], options);
 
   _RqlTable.fromDb(_RqlDatabase db, String tableName,[options]):super(Term_TermType.TABLE,[db,tableName],options);
-
-  _RqlInsert insert(records,[options]) => new _RqlInsert(this,records,options);
-
-  _RqlGet get(key) => new _RqlGet(this,key);
-
-  _RqlGetAll getAll(keys,[Map options]) => new _RqlGetAll(_listify(keys),options);
-
-  _RqlIndexCreate indexCreate(String index,[Function indexFunction]) => new _RqlIndexCreate(this,index,_funcWrap(indexFunction));
-
-  _RqlIndexDrop indexDrop(String index) => new _RqlIndexDrop(this,index);
-
-  _RqlIndexList indexList() => new _RqlIndexList(this);
-
-  _RqlIndexStatus indexStatus([index]) => new _RqlIndexStatus(_listify(index));
-
-  _RqlIndexWait indexWait([index]) =>  new _RqlIndexWait(_listify(index));
-
-  _RqlSync sync() => new _RqlSync(this);
-
-  noSuchMethod(Invocation invocation) {
-    var methodName = invocation.memberName;
-    List tmp = invocation.positionalArguments;
-          List args = [];
-          Map options = null;
-          for(var i=0; i < tmp.length; i++){
-            if(tmp[i] is Map && i == tmp.length-1)
-              options = tmp[i];
-            else
-              args.add(tmp[i]);
-          }
-
-    if(methodName == const Symbol("getAll"))
-      return this.getAll(args,options);
-    if(methodName == const Symbol("indexStatus"))
-      return this.indexStatus(args);
-    if(methodName == const Symbol("indexWait"))
-      return this.indexWait(args);
-    if(methodName == const Symbol("withFields"))
-      return this.withFields(args);
-    if(methodName == const Symbol("contains"))
-      return this.contains(args);
-    if(methodName == const Symbol("pluck"))
-      return this.pluck(args);
-    if(methodName == const Symbol("without"))
-      return this.without(args);
-    if(methodName == const Symbol("hasFields"))
-      return this.hasFields(args);
-    if(methodName == const Symbol("orderBy"))
-      return this.orderBy(args,options);
-
-  }
 
 }
 
@@ -857,7 +832,7 @@ class _RqlToEpochTime extends _RqlTerm {
 }
 
 _funcWrap(val){
-  val = expr(val);
+  val = _expr(val);
   // Scan for IMPLICIT_VAR or JS
   List argList = [];
   List optList = [];
@@ -899,7 +874,7 @@ class _RqlFunction extends _RqlTerm {
       _RqlFunction.nextId++;
     }
 
-    this._args =  [new _RqlMakeArray(vrids),expr(Function.apply(fun, vrs))];
+    this._args =  [new _RqlMakeArray(vrids),_expr(Function.apply(fun, vrs))];
 
   }
 
@@ -918,7 +893,7 @@ class _RqlLiteral extends _RqlTerm {
 }
 
 
-_RqlTerm expr(val)
+_RqlTerm _expr(val)
 {
   if(val is _RqlTerm)
     return val;
@@ -926,13 +901,13 @@ _RqlTerm expr(val)
     return new _RqlISO8601(val.toString(),_fmtTz(val.timeZoneOffset.toString()));
   else if(val is List) {
     List copy = [];
-    val.forEach((element)=>copy.add(expr(element)));
+    val.forEach((element)=>copy.add(_expr(element)));
     return new _RqlMakeArray(copy);
   }
   else if(val is Map) {
     Map obj = {};
     val.forEach((k,v){
-      obj[k] = expr(v);
+      obj[k] = _expr(v);
     });
     return new _RqlMakeObj(obj);
   }
