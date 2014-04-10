@@ -100,9 +100,9 @@ abstract class _RqlTerm {
 
   _RqlContains contains(items) => new _RqlContains(_listify(items,true));
 
-  _RqlHasFields hasFields(items) => new _RqlHasFields(_listify(items));
+  _RqlHasFields hasFields(items) => new _RqlHasFields(this,items);
 
-  _RqlWithFields withFields([fields]) => new _RqlWithFields(_listify(fields));
+  _RqlWithFields withFields([fields]) => new _RqlWithFields(this,fields);
 
   _RqlKeys keys() => new _RqlKeys(this);
 
@@ -431,11 +431,11 @@ class _RqlContains extends _RqlTerm {
 }
 
 class _RqlHasFields extends _RqlTerm {
-  _RqlHasFields(obj,[items]) : super(Term_TermType.HAS_FIELDS,[obj,items]);
+  _RqlHasFields(obj,items) : super(Term_TermType.HAS_FIELDS,[obj,items]);
 }
 
 class _RqlWithFields extends _RqlTerm {
-  _RqlWithFields(fields) : super(Term_TermType.WITH_FIELDS,[_buildList(fields)]);
+  _RqlWithFields(obj,fields) : super(Term_TermType.WITH_FIELDS,[obj,fields]);
 }
 
 class _RqlKeys extends _RqlTerm {
@@ -443,7 +443,7 @@ class _RqlKeys extends _RqlTerm {
 }
 
 class _RqlObject extends _RqlTerm {
-  _RqlObject(arg1,arg2) : super(Term_TermType.OBJECT,[arg1,arg2]);
+  _RqlObject(args) : super(Term_TermType.OBJECT,args);
 }
 
 class _RqlPluck extends _RqlTerm {
@@ -553,7 +553,7 @@ class _RqlGetAll extends _RqlTerm {
 }
 
 class _RqlReduce extends _RqlTerm {
-  _RqlReduce(seq,reductionFunction,[base]) : super(Term_TermType.REDUCE,[seq,reductionFunction],{"base":base});
+  _RqlReduce(seq,reductionFunction,[base]) : super(Term_TermType.REDUCE,[seq,reductionFunction],base);
 }
 
 class _RqlSum extends _RqlTerm {

@@ -16,7 +16,7 @@ part 'src/datum.dart';
 part 'src/query.dart';
 part 'src/options.dart';
 
-
+class Rethinkdb{
 // Connection Management
 /**
  * Create a new connection to the database server. Accepts the following options:
@@ -161,13 +161,13 @@ Map avg(String attr) => {"AVG": attr};
 /**
  * Returns the currently visited document.
  */
-_RqlImplicitVar row(String rowName) => new _RqlImplicitVar();
+_RqlGetField row(String rowName) => new _RqlGetField(new _RqlImplicitVar(),rowName);
 
 /**
  * Adds fields to an object
  */
 
-_RqlObject object(arg1,arg2) => new _RqlObject(arg1,arg2);
+_RqlObject object(args) => new _RqlObject(args);
 
 /**
  * change the string to uppercase
@@ -178,3 +178,20 @@ _RqlObject object(arg1,arg2) => new _RqlObject(arg1,arg2);
   * Change a string to lowercase
   */
  _RqlDownCase downcase(String str) => new _RqlDownCase(str);
+
+ noSuchMethod(Invocation invocation) {
+       var methodName = invocation.memberName;
+       List tmp = invocation.positionalArguments;
+             List args = [];
+             Map options = null;
+             for(var i=0; i < tmp.length; i++){
+               if(tmp[i] is Map && i == tmp.length-1)
+                 options = tmp[i];
+               else
+                 args.add(tmp[i]);
+             }
+
+       if(methodName == const Symbol("object"))
+         return this.object(args);
+     }
+}

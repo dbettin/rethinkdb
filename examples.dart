@@ -1,6 +1,8 @@
-import 'lib/rethinkdb_driver.dart' as r;
+import 'lib/rethinkdb_driver.dart';
 
+Rethinkdb r = new Rethinkdb();
 main() {
+
   /**start the connection that returns a future
 * You may specify the database, host, port, and authkey if you wish:
 * connect(db: "Website_DB", port: 8000, host: "127.0.0.1", authKey: "some key").then(...)
@@ -177,8 +179,8 @@ exampleCommands(conn)
 
 
   /**withfields**/
-  //TODO fix
-  //r.table("animals").withFields(["id"]).run(conn).then((response)=>print(response));
+
+  //r.table("animals").withFields("id","kingdom").run(conn).then((response)=>print(response));
 
   /**concatMap works like a reduce**/
 
@@ -243,8 +245,8 @@ exampleCommands(conn)
 
 
   /**reduce Produces a single value from a sequence through repeated application of a reduction function.**/
-  //TODO fix reduce
-  //r.table("animals").map((doc)=>1).reduce((left,right)=>left).run(conn).then((response)=>print(response));
+
+  //r.table("animals").map((doc)=>1).reduce((left,right)=>left.add(right)).run(conn).then((response)=>print(response));
 
 
   /**count counts the objects in a sequence**/
@@ -280,8 +282,10 @@ exampleCommands(conn)
   //r.expr([1,2,3]).contains(3).run(conn).then((response)=>print(response));
 
   /**row**/
-  //TODO fix r.row
-  //r.table("animals").filter((row)=>row("number_in_wild").gt(1400)).run(conn).then((response)=>print(response));
+
+  //r.table("animals").filter((row)=>row("number_in_wild").gt(1600)).count().run(conn).then((response)=>print(response));
+
+  //r.table("animals").filter(r.row("number_in_wild").gt(1400)).count().run(conn).then((response)=>print(response));
 
   /**pluck selects fields specified**/
 
@@ -340,8 +344,8 @@ exampleCommands(conn)
   //r.expr({"id":1,"name":"ted","age":77})("name").run(conn).then((response)=>print(response));
 
   /**hasFields tests if an object has a certain field or fields**/
-  //TODO fix hasFields
-  //r.table("animals").hasFields("kingdom").run(conn).then((response)=>print(response));
+
+  //r.table("animals").get("cheetah").hasFields("kingdom","phylum").run(conn).then((response)=>print(response));
 
 
   /**insertAt inserts an object into an array at a given index**/
@@ -370,8 +374,8 @@ exampleCommands(conn)
 
 
   /**object creates an object from key value pairs**/
-  //TODO fix to allow multiple key/valu pairs
-  //r.object("A","first").run(conn).then((response)=>print(response));
+
+  //r.object("A","first","B","Second").run(conn).then((response)=>print(response));
 
 
   /**match matches a string for a regexp**/
