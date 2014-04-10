@@ -216,7 +216,6 @@ class _RqlConnection {
 
   Future <_RqlQuery> _start(query,[options]) {
     _updateCurrentDatabase(query);
-    print(query._protoQuery);
     this._log.fine('Query $query');
     this._sendQueue.addLast(query);
     return this._sendBuffer()._query.future;
