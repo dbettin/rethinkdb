@@ -898,7 +898,7 @@ _RqlTerm _expr(val)
   if(val is _RqlTerm)
     return val;
   else if(val is DateTime)
-    return new _RqlISO8601(val.toString(),_fmtTz(val.timeZoneOffset.toString()));
+    return new _RqlISO8601(val.toIso8601String(),_fmtTz(val.timeZoneOffset.toString()));
   else if(val is List) {
     List copy = [];
     val.forEach((element)=>copy.add(_expr(element)));
@@ -939,11 +939,4 @@ _buildList(val) {
   List copy = [];
   val.forEach((element)=>copy.add(element));
   return copy;
-}
-
-
-
-
-_reql_type_time_to_datetime(obj){
-  //TODO convert rql time to native DateTime
 }

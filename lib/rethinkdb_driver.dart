@@ -7,7 +7,6 @@ import 'package:fixnum/fixnum.dart';
 import 'package:logging/logging.dart';
 import 'dart:typed_data';
 import 'src/generated/ql2.pb.dart';
-import 'dart:convert';
 import 'dart:mirrors';
 part 'src/connection.dart';
 part 'src/exceptions.dart';
