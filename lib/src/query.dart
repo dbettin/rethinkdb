@@ -31,19 +31,20 @@ class _RqlQuery {
   }
 
   _handleProtoResponse(Response protoResponse) {
+
     if (options != null && options["noReply"]==true) {
       _query.complete();
     } else {
       switch (protoResponse.type) {
         case Response_ResponseType.SUCCESS_ATOM:
           var datumValue = _buildDatumResponseValue(protoResponse.response.first);
-          _query.complete(datumValue);
+          _query.complete(_buildResponse(datumValue));
           break;
         case Response_ResponseType.SUCCESS_SEQUENCE:
           protoResponse.response.forEach((e){
           datumValue.add(_buildDatumResponseValue(e));
           });
-          _query.complete(datumValue);
+          _query.complete(_buildResponse(datumValue));
           break;
         case Response_ResponseType.SUCCESS_PARTIAL:
           protoResponse.response.forEach((e){
@@ -65,6 +66,36 @@ class _RqlQuery {
     }
   }
 
+  _buildResponse(datum){
+    if(datum is List){
+      for(int i=0;i<datum.length;i++){
+        datum[i] = _buildResponse(datum[i]);
+      }
+    }
+    if(datum is Map){
+      if(datum.containsKey("\$reql_type\$")){
+        if(datum["\$reql_type\$"] == "TIME"){
+          String s = datum["epoch_time"].toString();
+          List l = s.split('.');
+          while(l[1].length < 3){
+            l[1] = l[1]+"0";
+          }
+          s = l.join("");
+          datum = new DateTime.fromMillisecondsSinceEpoch(int.parse(s));
+        }
+      }else{
+        datum.forEach((k,v){
+          if(v is Map){
+            datum[k] = _buildResponse(v);
+          }else if(v is List){
+            datum[k] = _buildResponse(v);
+          }
+        });
+      }
+    }
+
+    return datum;
+  }
   List<int> get _buffer => _protoQuery.writeToBuffer();
 }
 
