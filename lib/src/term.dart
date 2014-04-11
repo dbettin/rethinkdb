@@ -649,7 +649,7 @@ class _RqlReplace extends _RqlTerm {
 }
 
 class _RqlInsert extends _RqlTerm {
-  _RqlInsert(table,records,[options]) : super(Term_TermType.INSERT, [table,new _RqlJson( JSON.encode(records))],options);
+  _RqlInsert(table,records,[options]) : super(Term_TermType.INSERT, [table, records],options);
 }
 
 class _RqlDbCreate extends _RqlTerm {
