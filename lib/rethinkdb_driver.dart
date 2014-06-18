@@ -7,7 +7,6 @@ import 'package:fixnum/fixnum.dart';
 import 'package:logging/logging.dart';
 import 'dart:typed_data';
 import 'src/generated/ql2.pb.dart';
-import 'dart:convert';
 import 'dart:mirrors';
 part 'src/connection.dart';
 part 'src/exceptions.dart';
@@ -16,7 +15,7 @@ part 'src/datum.dart';
 part 'src/query.dart';
 part 'src/options.dart';
 
-
+class Rethinkdb{
 // Connection Management
 /**
  * Create a new connection to the database server. Accepts the following options:
@@ -120,7 +119,7 @@ _RqlNow now() => new _RqlNow();
  * Evaluate the expr in the context of one or more value bindings.
  * The type of the result is the type of the value returned from expr.
  */
-_RqlDo reqlDo(arg,[args,expr]) => new _RqlDo(arg,[args],expr);
+_RqlDo rqlDo(arg,[expr]) => new _RqlDo(arg,expr);
 
 /**
  * If the test expression returns false or null, the [falseBranch] will be executed.
@@ -161,20 +160,49 @@ Map avg(String attr) => {"AVG": attr};
 /**
  * Returns the currently visited document.
  */
-_RqlImplicitVar row(String rowName) => new _RqlImplicitVar();
+_RqlGetField row(String rowName) => new _RqlGetField(new _RqlImplicitVar(),rowName);
 
 /**
  * Adds fields to an object
  */
 
-_RqlObject object(arg1,arg2) => new _RqlObject(arg1,arg2);
+_RqlObject object(args) => new _RqlObject(args);
 
 /**
  * change the string to uppercase
  */
- _RqlUpcase upcase(String str) => new _RqlUpcase(str);
+ _RqlUpCase upcase(String str) => new _RqlUpCase(str);
 
  /**
   * Change a string to lowercase
   */
- _RqlDowncase downcase(String str) => new _RqlDowncase(str);
+ _RqlDownCase downcase(String str) => new _RqlDownCase(str);
+
+ _RqlTerm expr(val) => _expr(val);
+
+ noSuchMethod(Invocation invocation) {
+       var methodName = invocation.memberName;
+       List tmp = invocation.positionalArguments;
+             List args = [];
+             Map options = null;
+             for(var i=0; i < tmp.length; i++){
+               if(tmp[i] is Map && i == tmp.length-1)
+                 options = tmp[i];
+               else
+                 args.add(tmp[i]);
+             }
+
+       if(methodName == const Symbol("object"))
+         return this.object(args);
+       if(methodName == const Symbol("rqlDo"))
+         return this.rqlDo(args.sublist(0, args.length-1),args[args.length-1]);
+     }
+
+int monday = 1;
+int tuesday = 2;
+int wednesday = 3;
+int thursday = 4;
+int friday = 5;
+int saturday = 6;
+int sunday = 7;
+}
