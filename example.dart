@@ -7,7 +7,8 @@ main() {
 * You may specify the database, host, port, and authkey if you wish:
 * connect(db: "Website_DB", port: 8000, host: "127.0.0.1", authKey: "some key").then(...)
 */
-  r.connect(db: "test",port: 28015).then((connection)=>exampleCommands(connection));
+  //r.connect(db: "test",port: 28015).then((connection)=>exampleCommands(connection));
+
 }
 exampleCommands(conn)
 {
@@ -108,7 +109,7 @@ exampleCommands(conn)
 
   //r.table("animals").get("sloth").replace({"id":"sloth","number_in_wild":2000,"kingdom":"not a bear","phylum":"not the same as a bear"}).run(conn).then((response)=>print(response));
 
-
+  r.table("animals").get("cats").replace({"id":"cats","date":r.now(),"replaced":true},{"return_vals":true}).run(conn).then((response)=>print(response));
   /**delete deletes a record**/
 
   //r.table("animals").get("sloth").delete().run(conn).then((response)=>print(response));

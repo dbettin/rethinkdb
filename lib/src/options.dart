@@ -9,7 +9,6 @@ abstract class OptionsBuilder<T> {
   OptionsBuilder(this._protoOptions);
 
   buildProtoOptions(Map options) {
-
     options.forEach((key, value) {
       if (value is bool) {
         _buildBoolOption(key, value);
@@ -49,7 +48,8 @@ abstract class OptionsBuilder<T> {
   }
 
   _addToProtoOptions(term, key) {
-    _protoOptions.add(_buildPair(term.build(), key));
+    if(term != null)
+      _protoOptions.add(_buildPair(term.build(), key));
   }
 
   T _buildPair(term, key);

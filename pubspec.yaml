@@ -1,5 +1,5 @@
 name: rethinkdb_driver
-version: 0.4.2
+version: 0.4.3
 authors:
 - Dave Bettin <me@davebettin.com>
 - William Welch <billywelch@gmail.com>
